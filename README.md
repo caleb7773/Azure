@@ -7,8 +7,8 @@ sudo apt install git -y
 # Install Azure CLI
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 # Clone Github Repo
-cd ~
+cd ~<br>
 git clone https://github.com/caleb7773/Bipittybop.git
 # Enter the directory and run one of the two scripts
-cd Bipittybop
+cd Bipittybop<br>
 ls -lah *.sh
