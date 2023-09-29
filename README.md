@@ -25,7 +25,10 @@ git clone https://github.com/caleb7773/Azure.git
 cd Azure
 ```
 ### To Deploy a simple Redirectory type:
+```
 bash Azure_Redirector.sh
-<br>
+```
 ### To Deploy a simple VPN Server type:
+```
 bash Azure_VPN_Server.sh
+```
