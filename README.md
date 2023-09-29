@@ -1,5 +1,8 @@
 # Deploying Azure Scripts
 
+## Configured and Tested using Ubuntu 22.04 Virtual Machine
+Please be a gem and don't try anything else...
+
 ### Update your Machine
 sudo apt update -y && sudo apt upgrade -y
 ### Install GIT
