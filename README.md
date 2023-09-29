@@ -14,4 +14,9 @@ Please be a gem and don't try anything else...
 <i>git clone https://github.com/caleb7773/Bipittybop.git</i>
 #### Enter the directory and run one of the two scripts
 <i>cd Bipittybop<br></i>
-<i>ls -lah *.sh</i>
+<br>
+#### To Deploy a simple Redirectory type:
+<i>bash Azure_Redirector.sh</i>
+<br>
+#### To Deploy a simple VPN Server type:
+<i>bash Azure_VPN_Server.sh</i>
