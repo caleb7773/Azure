@@ -11,9 +11,9 @@ Please be a gem and don't try anything else...
 <i>curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash</i>
 #### Clone Github Repo
 <i>cd ~<br></i>
-<i>git clone https://github.com/caleb7773/Bipittybop.git</i>
+<i>git clone https://github.com/caleb7773/Azure.git</i>
 #### Enter the directory and run one of the two scripts
-<i>cd Bipittybop<br></i>
+<i>cd Azure<br></i>
 <br>
 ### To Deploy a simple Redirectory type:
 bash Azure_Redirector.sh
