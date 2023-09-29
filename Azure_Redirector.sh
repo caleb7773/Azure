@@ -486,7 +486,7 @@ ssh-keyscan -H ${VM_1_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
 
 scp -o StrictHostKeyChecking=no fe_deployment_script.sh azureuser@${VM_1_Public_IP_ADDRESS}:/tmp/
 scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} be_deployment_script.sh ${server_name}_server.conf azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
-cd client_certs
+
 
 clear
 echo
@@ -518,14 +518,6 @@ echo
 ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS}
 
 clear
-#echo " Set a CA Password to ensure you can create keys in the future,"
-#echo "  and your CA is not left insecure in the meanwhile."
-echo
-#read -p " Press ENTER to continue " enter
-clear
-cd ../../
-easyrsa="./easy-rsa/easyrsa3/easyrsa"
-#bash ${easyrsa} set-pass ca
 sudo rm -rf be_deployment_script.sh
 sudo rm -rf fe_deployment_script.sh
 clear
