@@ -15,15 +15,13 @@ sudo apt install git -y
 ```
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
-#### Clone Github Repo
+#### Clone Github Repo and enter Directory
 ```
 cd ~
 git clone https://github.com/caleb7773/Azure.git
-```
-#### Enter the directory and run one of the two scripts
-```
 cd Azure
 ```
+<br><br><br>
 ### To Deploy a simple Redirectory type:
 ```
 bash Azure_Redirector.sh
