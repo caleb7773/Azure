@@ -20,3 +20,10 @@ bash Azure_Redirector.sh
 <br>
 ### To Deploy a simple VPN Server type:
 bash Azure_VPN_Server.sh
+
+
+```
+function test() {
+  console.log("This code will have a copy button to the right of it");
+}
+```
