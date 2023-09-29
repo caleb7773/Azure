@@ -224,6 +224,21 @@ VMNAME2=VPN_BE
 VPN_PORT=${port}
 
 
+output=$(az group show --name ${RESOURCE_GROUP} 2> /dev/null)
+if [[ "${output}" == *Succeeded* ]];
+then
+	clear
+ 	echo "Resource Group Already Exists!"
+  	echo "Please pick a different project name or region and try again"
+   	echo
+    	echo "Existing Resource Groups:"
+    	az group list | grep name | cut -d '"' -f4
+     	exit
+fi
+
+
+
+
 # Connect to Azure CLI
 az account show
 if ! [[ ${?} == 0 ]];
