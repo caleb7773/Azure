@@ -1,7 +1,4 @@
-# Bipittybop
-Welcome to my github!
-
-Prereqs:
+# Deploying Azure Scripts
 
 # Update your Machine
 sudo apt update -y && sudo apt upgrade -y
