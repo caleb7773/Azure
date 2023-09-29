@@ -7,9 +7,9 @@ Please be a gem and don't try anything else...
 ```
 sudo apt update -y && sudo apt upgrade -y
 ```
-#### Install GIT
+#### Install GIT and Curl
 ```
-sudo apt install git -y
+sudo apt install git curl -y
 ```
 #### Install Azure CLI
 ```
