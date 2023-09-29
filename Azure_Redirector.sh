@@ -518,8 +518,8 @@ echo
 ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS}
 
 clear
-sudo rm -rf be_deployment_script.sh
-sudo rm -rf fe_deployment_script.sh
+rm -rf be_deployment_script.sh
+rm -rf fe_deployment_script.sh
 clear
 echo "Redirector Built:"
 echo "If you go to ${PROTOCOL}/${VM_1_Public_IP_ADDRESS}:${ENDPORT}"
