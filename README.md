@@ -15,8 +15,8 @@ Please be a gem and don't try anything else...
 #### Enter the directory and run one of the two scripts
 <i>cd Bipittybop<br></i>
 <br>
-#### To Deploy a simple Redirectory type:
+### To Deploy a simple Redirectory type:
 <i>bash Azure_Redirector.sh</i>
 <br>
-#### To Deploy a simple VPN Server type:
+### To Deploy a simple VPN Server type:
 <i>bash Azure_VPN_Server.sh</i>
