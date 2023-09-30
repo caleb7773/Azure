@@ -127,6 +127,8 @@ echo "##########################################################################
 	then
 		REGION=eastus
 	fi
+ 	echo
+ 	echo "Validating Region Choice..."
 	output=$(az account list-locations -o table)
 	if [[ "${output}" != *${REGION}* ]];
 	then
@@ -137,6 +139,9 @@ echo "##########################################################################
 		read -p "Press ENTER to try again" ENTER
 	     	builder_variables
 	fi
+  	echo
+ 	echo "Grabbing Resource Groups in your region..."
+  	echo
 	az group list | grep "\"${SUBSCRIPTION_NAME}-${REGION}-" | cut -d '"' -f4 | sort > groups.list
 	clear
 	if [[ $(cat groups.list | wc -l) -eq 0 ]];
@@ -165,6 +170,8 @@ echo "##########################################################################
 		PROJECT=twister
 	fi
 	RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-rg
+   	echo
+ 	echo "Validating Resource Group Choice..."
 	output=$(az group show --name ${RESOURCE_GROUP} 2> /dev/null)
 	if [[ "${output}" == *Succeeded* ]];
 	then
@@ -218,6 +225,8 @@ echo "##########################################################################
 	then
 		REGION2=centralus
 	fi
+    	echo
+ 	echo "Validating Region Choice..."
 	output=$(az account list-locations -o table)
 	if [[ "${output}" != *${REGION2}* ]];
 	then
