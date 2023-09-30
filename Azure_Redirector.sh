@@ -1,178 +1,269 @@
-# Azure Regions:
-# westus,eastus,northeurope,westeurope,eastasia,southeastasia,northcentralus
-#southcentralus,centralus,eastus2,japaneast,japanwest,brazilsouth,australiaeast
-#australiasoutheast,centralindia,southindia,westindia,canadacentral,canadaeast
-#westcentralus,westus2,ukwest,uksouth,koreacentral,koreasouth,francecentral
-#australiacentral,southafricanorth,uaenorth,switzerlandnorth,germanywestcentral
-#norwayeast,westus3,jioindiawest,swedencentral,qatarcentral,polandcentral
-#italynorth,israelcentral
+#!/bin/bash
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+NC='\033[0m' # No Color
+# Connect to Azure CLI
+az account show
+if ! [[ ${?} == 0 ]];
+then
+	az login
+fi
 
-
-
-#### Modify These Variables before starting ####
-SUBSCRIPTION_NAME=s2vaus-sandbox-tactical
-################################################
-
-
-
-
+# Modify some files we will use later to test when the multithreading is complete
+# We will delete these later in the script
 echo n > vm1
 echo n > vm2
 echo n > first_finished
 echo n > second_finished
 
-
-
-subnet_variable_reset() {
-	# This function will reseet the subnet variables to allow for a fresh start
-unset dev_client_name
-unset dev_server_name
-unset vpn_ip
-unset server_ip
-unset port
-unset server_name
-unset client_total
-dns=1.1.1.1
-cipher=256
-choice=N
-}
-
-subnet_variable_check() {
-	# This function will check for subnet variables that have not yet been set
-if [[ -z "${dev_client_name}" ]];
-then
-	dev_client_name="..."
-fi
-if [[ -z "${dev_server_name}" ]];
-then
-	dev_server_name="..."
-fi
-if [[ -z "${vpn_ip}" ]];
-then
-	vpn_ip="..."
-fi
-if [[ -z "${server_ip}" ]];
-then
-	server_ip="..."
-fi
-if [[ -z "${port}" ]];
-then
-	port="..."
-fi
-if [[ -z "${server_name}" ]];
-then
-	server_name="..."
-fi
-}
-
-
-
-subnet_builder_menu() {
-	# This function will create a display for the end user to see what they have done
-subnet_variable_check
+builder_menu() {
+# This function will create a display for the end user to see what they have done
 clear
 echo
 echo " #############################################################################"
 echo " #############################################################################"
 echo " ###                                                                       ###"
-echo " ###        We need the following information for your Subnet Server       ###"
+echo -e " ###        ${GREEN}We need the following information for your Redirector Pair${NC}     ###"
 echo " ###                                                                       ###"
 echo " #############################################################################"
 echo " #############################################################################"
-echo " ###                                ##  " 
-echo " ###    Examples:                   ##    Your Choices: "  
-echo " ###                                ##  "
-echo " ###                                ##  Project Name: ${PROJECT}"
-echo " ###                                ##  Front End Region: ${REGION}"
-echo " ###                                ##  Egress Region: ${REGION2}"
-echo " ###                                ##  Endpoint IP: ${ENDPOINT}"
-echo " ###                                ##  Endpoint Port: ${ENDPORT}"
-echo " ###                                ##  Endpoint Port: ${PROTOCOL}"
-echo " ###                                ##  "
+echo " ###  " 
+echo -e " ###    ${GREEN}Your Choices:${NC} "  
+echo " ###  "
+echo -e " ###  ${GREEN}Subscription Name:${RED} ${SUBSCRIPTION_NAME}${NC}"
+echo -e " ###  ${GREEN}Project Name:${RED} ${PROJECT}${NC}"
+echo " ###  "
+echo -e " ###  ${GREEN}Front End Region:${RED} ${REGION}${NC}"
+echo -e " ###  ${GREEN}Egress Region:${RED} ${REGION2}${NC}"
+echo " ###  "
+echo -e " ###  ${GREEN}Endpoint IP:${RED} ${ENDPOINT}${NC}"
+echo -e " ###  ${GREEN}Endpoint Port:${RED} ${ENDPORT}${NC}"
+echo -e " ###  ${GREEN}Endpoint Port:${RED} ${PROTOCOL}${NC}"
+echo " ###"
 echo " #############################################################################"
 echo " #############################################################################"
 echo
 }
 
+# Setting the choice variable to "N" will allow it loop on the first iteration
+choice=N
 
-
-
-subnet_builder_variables() {
-	# This function will interact with the user to receive inputs
-subnet_variable_reset
-while [[ "${choice}" == N ]];
+builder_variables() {
+# This function will interact with the user to receive inputs
+while [[ "${choice}" != [y/Y] ]];
 do
-	subnet_builder_menu
-	echo " What is your Azure Subscription ID for 'Sandbox Tactical' (########-####-####-####-############)?"
-	read -p " > " SUBSCRIPTION
-	subnet_builder_menu
-	echo " What is your Project Name for your Resource Group (twister)?"
-	read -p " > " PROJECT
-	if [[ -z "${PROJECT}" ]];
-	then
-		PROJECT=twister
-	fi
-	subnet_builder_menu
 	clear
-	tee << EOF
- Azure Regions:
-westus,eastus,northeurope,westeurope,eastasia,southeastasia,northcentralus
-southcentralus,centralus,eastus2,japaneast,japanwest,brazilsouth,australiaeast
-australiasoutheast,centralindia,southindia,westindia,canadacentral,canadaeast
-westcentralus,westus2,ukwest,uksouth,koreacentral,koreasouth,francecentral
-australiacentral,southafricanorth,uaenorth,switzerlandnorth,germanywestcentral
-norwayeast,westus3,jioindiawest,swedencentral,qatarcentral,polandcentral
-italynorth
-EOF
+ 	# Reach out to Azure and grab the subscriptions this user has access to.
+  	echo  -e " What subscription do you want to deploy in ${GREEN}(s2vaus-sandbox-tactical)${NC}?"
+  	echo  -e " If you press ${RED}ENTER${NC} you will pick the default value."
+   	echo  -e " ${GREEN}Pick the number${NC} corresponding to your choice"
+   	echo
+	num=1
+	az account list | grep s2vaus | cut -d '"' -f4 | sort > subs.list
+	
+	for i in $(cat subs.list);
+	do 
+		echo " (${num}) ${i}"
+		((num++))
+	done > output.list
+	rm -rf subs.list
+	echo -e "${GREEN}"
+	cat output.list
+	echo -e "${NC}"
+    	echo
+	read -N 1 -p " Number is -> " SUBSCRIPTION_NAME
+ 	SUBSCRIPTION_NAME=$(cat output.list | head -${SUBSCRIPTION_NAME} | tail -1 | cut -d ' ' -f3)
+ 	rm -rf output.list
+	if [[ -z "${SUBSCRIPTION_NAME}" ]];
+	then
+		SUBSCRIPTION_NAME=s2vaus-sandbox-tactical
+	fi
+	SUBSCRIPTION=$(az account list | grep "\"${SUBSCRIPTION_NAME}\"" -B 3 | grep id | cut -d '"' -f4)
 	echo
-	echo " What region is closest to your users (eastus)?"
+	
+	# Connect to Azure Subscription
+	az account set -s ${SUBSCRIPTION}
+	clear
+	echo -e " ${RED}Azure Regions:${NC}"
+
+echo "		North America"
+echo -e "${GREEN} westus - westus2 - westus3${NC}"
+echo -e "${GREEN} westcentralus - northcentralus - southcentralus - centralus${NC}"
+echo -e "${GREEN} eastus - eastus2${NC}"
+echo -e "${GREEN} canadacentral - canadaeast${NC}"
+
+echo "		Europe"
+echo -e "${GREEN} northeurope - westeurope - francecentral${NC}"
+echo -e "${GREEN} ukwest - uksouth - switzerlandnorth - germanywestcentral${NC}"
+echo -e "${GREEN} norwayeast - swedencentral - polandcentral - italynorth${NC}"
+
+echo "		Asia"
+echo -e "${GREEN} eastasia - southeastasia${NC}"
+echo -e "${GREEN} centralindia - southindia - westindia${NC}"
+echo -e "${GREEN} japaneast - japanwest${NC}"
+echo -e "${GREEN} koreacentral - koreasouth${NC}"
+
+echo "		South America"
+echo -e "${GREEN} brazilsouth${NC}"
+	
+echo "		Australia"
+echo -e "${GREEN} australiaeast - australiasoutheast - australiacentral${NC}"
+
+echo "		Middle East"
+echo -e "${GREEN} uaenorth - qatarcentral${NC}"
+
+echo "		Africa"
+echo -e "${GREEN} southafricanorth${NC}"
+echo
+echo "#############################################################################"
+echo "#############################################################################"
+
+	echo	
+	echo
+	echo
+	echo -e " Where do you want your users to ${GREEN}enter${NC} the redirector ${RED}(eastus)${NC}?"
 	read -p " > " REGION
 	if [[ -z "${REGION}" ]];
 	then
 		REGION=eastus
 	fi
-	subnet_builder_menu
+	output=$(az account list-locations -o table)
+	if [[ "${output}" != *${REGION}* ]];
+	then
+		clear
+	 	echo -e "${RED} ${REGION} - doesn't exists!${NC}"
+	  	echo -e "Please pick a ${GREEN}region from the list${NC}"
+	   	echo
+		read -p "Press ENTER to try again" ENTER
+	     	builder_variables
+	fi
+	az group list | grep "\"${SUBSCRIPTION_NAME}-${REGION}-" | cut -d '"' -f4 | sort > groups.list
 	clear
-	tee << EOF
- Azure Regions:
-westus,eastus,northeurope,westeurope,eastasia,southeastasia,northcentralus
-southcentralus,centralus,eastus2,japaneast,japanwest,brazilsouth,australiaeast
-australiasoutheast,centralindia,southindia,westindia,canadacentral,canadaeast
-westcentralus,westus2,ukwest,uksouth,koreacentral,koreasouth,francecentral
-australiacentral,southafricanorth,uaenorth,switzerlandnorth,germanywestcentral
-norwayeast,westus3,jioindiawest,swedencentral,qatarcentral,polandcentral
-italynorth
-EOF
+	if [[ $(cat groups.list | wc -l) -eq 0 ]];
+	then
+		echo
+	else
+		echo
+		echo -e " The following Resource Groups are ${RED}already in this region${NC}"
+		echo 
+		echo -e "${GREEN}"
+		cat groups.list
+		echo -e "${NC}"
+		echo
+		echo -e " ${RED}Do not overlap with any previous Resource Groups${NC}"
+		echo
+		echo
+		echo
+	fi
+	rm -rf groups.list
+	echo -e " What would you like to name your Project ${GREEN}(twister)${NC}?"
+	echo -e " ${GREEN}twister${NC} would be -> ${SUBSCRIPTION_NAME}-${REGION}-${GREEN}twister${NC}-rg"
+
+	read -p " > " PROJECT
+	if [[ -z "${PROJECT}" ]];
+	then
+		PROJECT=twister
+	fi
+	RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-rg
+	output=$(az group show --name ${RESOURCE_GROUP} 2> /dev/null)
+	if [[ "${output}" == *Succeeded* ]];
+	then
+		clear
+	 	echo -e "${RED}Resource Group Already Exists!${NC}"
+	  	echo -e "Please pick a ${GREEN}different project name or region${NC}"
+	   	echo
+		read -p "Press ENTER to try again" ENTER
+	     	builder_variables
+	fi
+	builder_menu
+	clear
+	echo -e " ${RED}Azure Regions:${NC}"
+
+echo "		North America"
+echo -e "${GREEN} westus - westus2 - westus3${NC}"
+echo -e "${GREEN} westcentralus - northcentralus - southcentralus - centralus${NC}"
+echo -e "${GREEN} eastus - eastus2${NC}"
+echo -e "${GREEN} canadacentral - canadaeast${NC}"
+
+echo "		Europe"
+echo -e "${GREEN} northeurope - westeurope - francecentral${NC}"
+echo -e "${GREEN} ukwest - uksouth - switzerlandnorth - germanywestcentral${NC}"
+echo -e "${GREEN} norwayeast - swedencentral - polandcentral - italynorth${NC}"
+
+echo "		Asia"
+echo -e "${GREEN} eastasia - southeastasia${NC}"
+echo -e "${GREEN} centralindia - southindia - westindia${NC}"
+echo -e "${GREEN} japaneast - japanwest${NC}"
+echo -e "${GREEN} koreacentral - koreasouth${NC}"
+
+echo "		South America"
+echo -e "${GREEN} brazilsouth${NC}"
+	
+echo "		Australia"
+echo -e "${GREEN} australiaeast - australiasoutheast - australiacentral${NC}"
+
+echo "		Middle East"
+echo -e "${GREEN} uaenorth - qatarcentral${NC}"
+
+echo "		Africa"
+echo -e "${GREEN} southafricanorth${NC}"
+echo
+echo "#############################################################################"
+echo "#############################################################################"
+
 	echo
-	echo " What region do you want to pop out of (centralus)?"
+	echo -e " What region do you want to ${RED}pop out${NC} of ${GREEN}(centralus)${NC}?"
 	read -p " > " REGION2
 	if [[ -z "${REGION2}" ]];
 	then
 		REGION2=centralus
 	fi
-	subnet_builder_menu
-	echo " What is your endpoint IP to send users to i.e. 23.62.11.8?"
-	read -p " > " ENDPOINT
-	subnet_builder_menu
-	echo " What Port is your endpoint using i.e. 443?"
-	read -p " > " ENDPORT
-	subnet_builder_menu
-	echo " What protocol do you want i.e. TCP?"
-	read -p " > " PROTOCOL
-	subnet_builder_menu
-	echo " Do these options look correct? [y/N]"
-	read -p " > " choice
-	if [[ "${choice}" != [y/Y] ]];
+	output=$(az account list-locations -o table)
+	if [[ "${output}" != *${REGION2}* ]];
 	then
-		subnet_variable_reset
+		clear
+	 	echo -e "${RED} ${REGION2} - doesn't exists!${NC}"
+	  	echo -e "Please pick a ${GREEN}region from the list${NC}"
+	   	echo
+		read -p "Press ENTER to try again" ENTER
+	     	builder_variables
 	fi
-
+	builder_menu
+	echo
+	echo -e " Your endpoint is the service you are trying ${GREEN}to reach out to${NC}"
+	echo -e "  The service you are trying to ${GREEN}hide attribution to${NC} by using this redirector"
+	echo
+	echo -e " What is your endpoint/service ${GREEN}IP${NC} i.e. ${GREEN}23.62.11.8${NC}?"
+	read -p " > " ENDPOINT
+	builder_menu
+	echo
+	echo -e " What ${GREEN}Port${NC} is your endpoint using i.e. ${GREEN}443${NC}?"
+	read -p " > " ENDPORT
+		if [[ -z "${ENDPORT}" ]];
+	then
+		ENDPORT=443
+	fi
+	builder_menu
+	echo
+	echo -e " What ${GREEN}Protocol${NC} is running your service?"
+	echo -e ${GREEN}
+	echo " (1) TCP"
+	echo " (2) UDP"
+	echo -e ${NC}
+	read -N 1 -p " > " PROTOCOL
+	if [[ ${PROTOCOL} == 1 ]];
+	then
+		PROTOCOL=TCP
+	else
+		PROTOCOL=UDP
+	fi
+	builder_menu
+	echo -e " Do these options look correct? ${GREEN}[Y${NC}/${RED}N]${NC}"
+	read -p " > " choice
 done
 }
-subnet_builder_variables
-
-
-RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-rg
+builder_variables
+clear
 VNET1=${SUBSCRIPTION_NAME}-${REGION}-FE-vnet
 VNET2=${SUBSCRIPTION_NAME}-${REGION2}-BE-vnet
 V_SUBNET1_NAME=FE-sub
@@ -187,49 +278,39 @@ VNIC1_IP=${SUBSCRIPTION_NAME}-${REGION}-FE-ip
 VNIC2_IP=${SUBSCRIPTION_NAME}-${REGION2}-BE-ip
 VMNAME=REDIR_FE
 VMNAME2=REDIR_BE
-VPN_PORT=${port}
-
-output=$(az group show --name ${RESOURCE_GROUP} 2> /dev/null)
-if [[ "${output}" == *Succeeded* ]];
-then
-	clear
- 	echo "Resource Group Already Exists!"
-  	echo "Please pick a different project name or region and try again"
-   	echo
-    	echo "Existing Resource Groups:"
-    	az group list | grep name | cut -d '"' -f4
-     	exit
-fi
-
-# Connect to Azure CLI
-az account show
-if ! [[ ${?} == 0 ]];
-then
-	az login
-fi
-
-# Connect to Azure Subscription
-az account set -s ${SUBSCRIPTION}
 
 # Create a new Resource Group
+echo -e "${NC}Creation has begun on - ${RESOURCE_GROUP}${RED}"
+echo -e "${RED}"
 az group create \
     --name ${RESOURCE_GROUP} \
-    --location ${REGION}
-   
+    --location ${REGION} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${RESOURCE_GROUP}${NC}"
 first_instance() {
+echo -e "${NC}Creation has begun on - ${VNET1}${RED}"
+echo -e "${RED}"
 az network vnet create \
     --name ${VNET1} \
     --resource-group ${RESOURCE_GROUP} \
     --address-prefix 10.0.0.0/16 \
     --subnet-name ${V_SUBNET1_NAME} \
     --location ${REGION} \
-    --subnet-prefixes ${V_SUBNET1}
-    
+    --subnet-prefixes ${V_SUBNET1} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNET1}${NC}"
+
+echo -e "${NC}Creation has begun on - ${NSG1}${RED}"
+echo -e "${RED}"
 az network nsg create \
     --resource-group ${RESOURCE_GROUP} \
     --location ${REGION} \
-    --name ${NSG1}
+    --name ${NSG1} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${NSG1}${NC}"
 
+echo -e "${NC}Modification has initiated on - ${NSG1}${RED}"
+echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
@@ -238,8 +319,12 @@ az network nsg rule create \
     --destination-address-prefixes '*' \
     --destination-port-ranges 22 \
     --protocol Tcp \
-    --description "Allow SSH"
-      
+    --description "Allow SSH" > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished modifying for SSH- ${NSG1}${NC}"
+
+echo -e "${NC}Modification has initiated on - ${NSG1}${RED}"
+echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
@@ -248,14 +333,22 @@ az network nsg rule create \
     --destination-address-prefixes '*' \
     --destination-port-ranges ${ENDPORT} \
     --protocol ${PROTOCOL} \
-    --description "Allow Redirector" 
-        
+    --description "Allow Redirector Traffic" > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished modifying for redirector- ${NSG1}${NC}"
+
+echo -e "${NC}Creation has begun on - ${VNIC1_IP}${RED}"
+echo -e "${RED}"
 az network public-ip create \
     --resource-group ${RESOURCE_GROUP} \
     --name ${VNIC1_IP} \
     --sku Standard \
-    --location ${REGION}
+    --location ${REGION} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC1_IP}${NC}"
 
+echo -e "${NC}Creation has begun on - ${VNIC1}${RED}"
+echo -e "${RED}"
 az network nic create \
     --resource-group ${RESOURCE_GROUP} \
     --name ${VNIC1} \
@@ -263,31 +356,45 @@ az network nic create \
     --location ${REGION} \
     --subnet ${V_SUBNET1_NAME} \
     --network-security-group ${NSG1} \
-    --public-ip-address ${VNIC1_IP}
-
- 
+    --public-ip-address ${VNIC1_IP} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC1}${NC}"
 }
 
 second_instance() {
+echo -e "${NC}Creation has begun on - ${VNET2}${RED}"
+echo -e "${RED}"
 az network vnet create \
     --name ${VNET2} \
     --resource-group ${RESOURCE_GROUP} \
     --address-prefix 10.1.0.0/16 \
     --subnet-name ${V_SUBNET2_NAME} \
     --location ${REGION2} \
-    --subnet-prefixes ${V_SUBNET2}
+    --subnet-prefixes ${V_SUBNET2} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNET2}${NC}"
     
+echo -e "${NC}Creation has begun on - ${NSG2}${RED}"
+echo -e "${RED}"
 az network nsg create \
     --resource-group ${RESOURCE_GROUP} \
     --location ${REGION2} \
-    --name ${NSG2}
+    --name ${NSG2} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${NSG2}${NC}"
 
+echo -e "${NC}Creation has begun on - ${VNIC2_IP}${RED}"
+echo -e "${RED}"
 az network public-ip create \
     --resource-group ${RESOURCE_GROUP} \
     --name ${VNIC2_IP} \
     --sku Standard \
-    --location ${REGION2}
+    --location ${REGION2} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC2_IP}${NC}"
 
+echo -e "${NC}Creation has begun on - ${VNIC2}${RED}"
+echo -e "${RED}"
 az network nic create \
     --resource-group ${RESOURCE_GROUP} \
     --name ${VNIC2} \
@@ -295,12 +402,13 @@ az network nic create \
     --location ${REGION2} \
     --subnet ${V_SUBNET2_NAME} \
     --network-security-group ${NSG2} \
-    --public-ip-address ${VNIC2_IP}
-
-
- 
+    --public-ip-address ${VNIC2_IP}  > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC2}${NC}"
 }
 
+# This is some fancy multithreading
+# First it will run the first function and then the second function without waiting
 first_instance && echo y > first_finished & second_instance && echo y > second_finished
 
 while [[ $(cat first_finished) != 'y' ]];
@@ -322,24 +430,30 @@ vNet2Id=$(az network vnet show \
   --name ${VNET2} \
   --query id \
   --out tsv)
+echo -e "${NC}Peering has begun between - ${VNET1} and ${VNET2}${RED}"
+echo -e "${RED}"
 az network vnet peering create \
   --name Peer_to_BE \
   --resource-group ${RESOURCE_GROUP} \
   --vnet-name ${VNET1} \
   --remote-vnet $vNet2Id \
-  --allow-vnet-access
+  --allow-vnet-access > /dev/null
+echo -e "${NC}"
   
 az network vnet peering create \
   --name Peer_to_FE \
   --resource-group ${RESOURCE_GROUP} \
   --vnet-name ${VNET2} \
   --remote-vnet $vNet1Id \
-  --allow-vnet-access
-
+  --allow-vnet-access > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished Peering - ${VNET1} and ${VNET2}${NC}"
  
 build_one() {
     
 # Create VM
+echo -e "${NC}Creation has begun on - ${VMNAME}${RED}"
+echo -e "${RED}"
 az vm create \
     --resource-group ${RESOURCE_GROUP} \
     --name ${VMNAME} \
@@ -348,9 +462,13 @@ az vm create \
     --size Standard_DS3_v2 \
     --admin-username azureuser \
     --generate-ssh-keys \
-    --nics ${VNIC1}
-   }
+    --nics ${VNIC1} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VMNAME}${NC}"
+}
    build_two() {
+echo -e "${NC}Creation has begun on - ${VMNAME2}${RED}"
+echo -e "${RED}"
 az vm create \
     --resource-group ${RESOURCE_GROUP} \
     --name ${VMNAME2} \
@@ -359,8 +477,10 @@ az vm create \
     --size Standard_DS3_v2 \
     --admin-username azureuser \
     --generate-ssh-keys \
-    --nics ${VNIC2}
-   } 
+    --nics ${VNIC2} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VMNAME2}${NC}"
+} 
    
 build_one && echo y > vm1 & build_two && echo y > vm2
 
@@ -385,22 +505,9 @@ export VM_2_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RE
 export VM_1_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME} --query publicIps --output tsv)
 export VM_2_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query publicIps --output tsv)
 
-echo "VM 1: ${VMNAME}"
-echo ${VM_1_Private_IP_ADDRESS}
-echo ${VM_1_Public_IP_ADDRESS}
-
-echo "VM 2: ${VMNAME2}"
-echo ${VM_2_Private_IP_ADDRESS}
-echo ${VM_2_Public_IP_ADDRESS}
-
-vpn_ip=${VM_1_Public_IP_ADDRESS}
-
-
-tee fe_deployment_script.sh << EOF
+tee fe.sh << EOF
 #!/bin/bash
-#
-# Execute on both ends of the Subnet tunnel
-# This script will setup the Jail
+
 sudo apt update && sudo apt upgrade -y
 
 # Adding IPTables Persistent Options
@@ -440,11 +547,9 @@ sudo sysctl -p
 exit
 EOF
 
-tee be_deployment_script.sh << EOF
+tee be.sh << EOF
 #!/bin/bash
 #
-# Execute on both ends of the Subnet tunnel
-# This script will setup the Jail
 sudo apt update && sudo apt upgrade -y
 
 # Adding IPTables Persistent Options
@@ -488,76 +593,25 @@ exit
 EOF
 clear
 
-
-
 ssh-keyscan -H ${VM_1_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
 
-
-
-
-scp -o StrictHostKeyChecking=no fe_deployment_script.sh azureuser@${VM_1_Public_IP_ADDRESS}:/tmp/
-scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} be_deployment_script.sh ${server_name}_server.conf azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
-
+scp -o StrictHostKeyChecking=no fe.sh azureuser@${VM_1_Public_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} be.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 
 clear
-echo
-echo
-echo "############################################################################"
-echo "############################################################################"
-echo
-echo "Copy and Paste the next line into the VPNFE SSH Session"
-echo 
-echo "sudo bash /tmp/fe_deployment_script.sh && logout"
-echo 
-echo "############################################################################"
-echo "############################################################################"
-echo
-ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS}
+
+ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} 'sudo bash /tmp/fe.sh && logout'
 clear
-echo
-echo
-echo "############################################################################"
-echo "############################################################################"
-echo
-echo "Copy and Paste the next line into the VPNBE SSH Session"
-echo 
-echo "sudo bash /tmp/be_deployment_script.sh && logout"
-echo 
-echo "############################################################################"
-echo "############################################################################"
-echo
-ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS}
+
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} 'sudo bash /tmp/fe.sh && logout'
 
 clear
-rm -rf be_deployment_script.sh
-rm -rf fe_deployment_script.sh
+rm -rf be.sh
+rm -rf fe.sh
 clear
-echo "Redirector Built:"
-echo "If you go to ${PROTOCOL}/${VM_1_Public_IP_ADDRESS}:${ENDPORT}"
-echo "you will get redirected to"
-echo "${PROTOCOL}/${ENDPOINT}:${ENDPORT}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+echo
+echo -e " ${GREEN}Redirector complete:${NC}"
+echo -e " Packets sent to ${GREEN}${VM_1_Public_IP_ADDRESS}:${ENDPORT} / ${PROTOCOL}${NC}"
+echo -e "    will get ${RED}redirected to${NC} ${GREEN}${ENDPOINT}:${ENDPORT} / ${PROTOCOL}${NC}"
+echo
+echo
