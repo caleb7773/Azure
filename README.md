@@ -24,10 +24,10 @@ cd Azure
 <br><br><br>
 ### To Deploy a simple VPN Server type:
 ```
-bash Azure_VPN_Server.sh
+bash VPN_Server.sh
 ```
 
 ### To Deploy a simple Redirector type:
 ```
-bash Azure_Redirector.sh
+bash Redirector.sh
 ```
