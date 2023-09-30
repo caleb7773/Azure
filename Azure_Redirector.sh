@@ -251,7 +251,7 @@ echo "##########################################################################
 	echo " (1) TCP"
 	echo " (2) UDP"
 	echo -e ${NC}
-	read -N 1 -p " > " PROTOCOL
+	read -N 1 -p " Number is -> " PROTOCOL
 	if [[ ${PROTOCOL} == 1 ]];
 	then
 		PROTOCOL=TCP
