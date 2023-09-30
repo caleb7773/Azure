@@ -246,6 +246,7 @@ echo "##########################################################################
 	builder_menu
 	echo
 	echo -e " What ${GREEN}Protocol${NC} is running your service?"
+    	echo -e " ${GREEN}Pick the number${NC} corresponding to your choice"
 	echo -e ${GREEN}
 	echo " (1) TCP"
 	echo " (2) UDP"
