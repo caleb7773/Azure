@@ -745,32 +745,10 @@ cd client_certs
 
 clear
 echo
-echo
-echo "############################################################################"
-echo "############################################################################"
-echo
-echo "Copy and Paste the next line into the VPNFE SSH Session"
-echo 
-echo "sudo bash /tmp/fe_deployment_script.sh && logout"
-echo 
-echo "############################################################################"
-echo "############################################################################"
-echo
-ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS}
+ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} 'sudo bash /tmp/fe_deployment_script.sh && logout'
 clear
 echo
-echo
-echo "############################################################################"
-echo "############################################################################"
-echo
-echo "Copy and Paste the next line into the VPNBE SSH Session"
-echo 
-echo "sudo bash /tmp/be_deployment_script.sh && logout"
-echo 
-echo "############################################################################"
-echo "############################################################################"
-echo
-ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS}
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} 'sudo bash /tmp/be_deployment_script.sh && logout'
 
 clear
 #echo " Set a CA Password to ensure you can create keys in the future,"
