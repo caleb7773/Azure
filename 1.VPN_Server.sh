@@ -363,7 +363,7 @@ VNIC2_IP=${SUBSCRIPTION_NAME}-${REGION2}-BE-ip
 VMNAME=VPN_FE
 VMNAME2=VPN_BE
 VPN_PORT=${port}
-
+clear
 # Create a new Resource Group
 echo -e "${NC}Creation has begun on - ${RESOURCE_GROUP}${RED}"
 echo -e "${RED}"
