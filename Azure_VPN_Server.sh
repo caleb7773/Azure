@@ -212,7 +212,7 @@ echo "##########################################################################
 		echo -e " The following Resource Groups are ${RED}already in this region${NC}"
 		echo 
 		echo -e "${GREEN}"
-		cat groups.list
+		cat ${project_code}-groups.list
 		echo -e "${NC}"
 		echo
 		echo -e " ${RED}Do not overlap with any previous Resource Groups${NC}"
