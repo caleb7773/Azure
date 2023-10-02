@@ -611,10 +611,10 @@ scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} ${project
 
 clear
 
-ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} 'sudo bash /tmp/${project_code}-fe.sh && logout'
+ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} "sudo bash /tmp/${project_code}-fe.sh && logout"
 clear
 
-ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} 'sudo bash /tmp/${project_code}-fe.sh && logout'
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} "sudo bash /tmp/${project_code}-fe.sh && logout"
 
 clear
 rm -rf ${project_code}-be.sh
