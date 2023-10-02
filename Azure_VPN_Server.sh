@@ -1,4 +1,5 @@
 #!/bin/bash
+project_code=${RANDOM}
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 NC='\033[0m' # No Color
@@ -11,10 +12,10 @@ fi
 
 # Modify some files we will use later to test when the multithreading is complete
 # We will delete these later in the script
-echo n > vm1
-echo n > vm2
-echo n > first_finished
-echo n > second_finished
+echo n > ${project_code}-vm1
+echo n > ${project_code}-vm2
+echo n > ${project_code}-first_finished
+echo n > ${project_code}-second_finished
 
 
 
@@ -498,13 +499,13 @@ echo -e "${GREEN}Finished - ${VNIC2}${NC}"
 
 # This is some fancy multithreading
 # First it will run the first function and then the second function without waiting
-first_instance && echo y > first_finished & second_instance && echo y > second_finished
+first_instance && echo y > ${project_code}-first_finished & second_instance && echo y > ${project_code}-second_finished
 
-while [[ $(cat first_finished) != 'y' ]];
+while [[ $(cat ${project_code}-first_finished) != 'y' ]];
 do
 	sleep 1s
 done
-while [[ $(cat second_finished) != 'y' ]];
+while [[ $(cat ${project_code}-second_finished) != 'y' ]];
 do
 	sleep 1s
 done
@@ -571,21 +572,21 @@ echo -e "${NC}"
 echo -e "${GREEN}Finished - ${VMNAME2}${NC}"
 } 
    
-build_one && echo y > vm1 & build_two && echo y > vm2
+build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2
 
-while [[ $(cat vm1) != 'y' ]];
+while [[ $(cat ${project_code}-vm1) != 'y' ]];
 do
 	sleep 1s
 done
-while [[ $(cat vm2) != 'y' ]];
+while [[ $(cat ${project_code}-vm2) != 'y' ]];
 do
 	sleep 1s
 done
     
-rm -rf first_finished
-rm -rf second_finished
-rm -rf vm1
-rm -rf vm2
+rm -rf ${project_code}-first_finished
+rm -rf ${project_code}-second_finished
+rm -rf ${project_code}-vm1
+rm -rf ${project_code}-vm2
 
     
 # Grabbing IP Addresses
