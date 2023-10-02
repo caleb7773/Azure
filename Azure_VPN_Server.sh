@@ -305,6 +305,22 @@ echo "##########################################################################
 	then
 		server_name=mwr
 	fi
+ 	if [[ -d "./${server_name}_subnet_vpn" ]];
+	then
+		clear
+		echo "New VPN Folder already exists."
+		echo "Do you want to overwrite it [y/N]?"
+		read -p " > " overwrite
+		if [[ "${overwrite}" == [y/Y] ]];
+		then
+			rm -rf ./"${server_name}"_subnet_vpn
+		else
+			clear
+			echo "You chose not to overwrite the directoy."
+			echo "Terminating the script to let you figure it out"
+			exit
+		fi
+	fi
 	builder_menu
 	echo " What port do you want to use (443)?"
 	read -p " > " port
