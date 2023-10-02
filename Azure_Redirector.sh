@@ -73,7 +73,7 @@ do
 	echo -e "${NC}"
     	echo
 	read -N 1 -p " Number is -> " SUBSCRIPTION_NAME
- 	SUBSCRIPTION_NAME=$(cat output.list | head -${SUBSCRIPTION_NAME} | tail -1 | cut -d ' ' -f3)
+ 	SUBSCRIPTION_NAME=$(cat ${project_code}-output.list | head -${SUBSCRIPTION_NAME} | tail -1 | cut -d ' ' -f3)
  	rm -rf ${project_code}-output.list
 	if [[ -z "${SUBSCRIPTION_NAME}" ]];
 	then
