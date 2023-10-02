@@ -2,6 +2,7 @@
 trap ctrl_c INT
 function ctrl_c() {
 	rm -rf ${project_code}*
+ 	exit
 }
 project_code=${RANDOM}
 RED='\033[1;31m'
