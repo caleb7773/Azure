@@ -60,21 +60,21 @@ do
    	echo  -e " ${GREEN}Pick the number${NC} corresponding to your choice"
    	echo
 	num=1
-	az account list | grep s2vaus | cut -d '"' -f4 | sort > subs.list
+	az account list | grep s2vaus | cut -d '"' -f4 | sort > ${project_code}-subs.list
 	
-	for i in $(cat subs.list);
+	for i in $(cat ${project_code}-subs.list);
 	do 
 		echo " (${num}) ${i}"
 		((num++))
-	done > output.list
-	rm -rf subs.list
+	done > ${project_code}-output.list
+	rm -rf ${project_code}-subs.list
 	echo -e "${GREEN}"
-	cat output.list
+	cat ${project_code}-output.list
 	echo -e "${NC}"
     	echo
 	read -N 1 -p " Number is -> " SUBSCRIPTION_NAME
  	SUBSCRIPTION_NAME=$(cat output.list | head -${SUBSCRIPTION_NAME} | tail -1 | cut -d ' ' -f3)
- 	rm -rf output.list
+ 	rm -rf ${project_code}-output.list
 	if [[ -z "${SUBSCRIPTION_NAME}" ]];
 	then
 		SUBSCRIPTION_NAME=s2vaus-sandbox-tactical
@@ -143,9 +143,9 @@ echo "##########################################################################
   	echo
  	echo "Grabbing Resource Groups in your region..."
   	echo
-	az group list | grep "\"${SUBSCRIPTION_NAME}-${REGION}-" | cut -d '"' -f4 | sort > groups.list
+	az group list | grep "\"${SUBSCRIPTION_NAME}-${REGION}-" | cut -d '"' -f4 | sort > ${project_code}-groups.list
 	clear
-	if [[ $(cat groups.list | wc -l) -eq 0 ]];
+	if [[ $(cat ${project_code}-groups.list | wc -l) -eq 0 ]];
 	then
 		echo
 	else
@@ -161,7 +161,7 @@ echo "##########################################################################
 		echo
 		echo
 	fi
-	rm -rf groups.list
+	rm -rf ${project_code}-groups.list
 	echo -e " What would you like to name your Project ${GREEN}(twister)${NC}?"
 	echo -e " ${GREEN}twister${NC} would be -> ${SUBSCRIPTION_NAME}-${REGION}-${GREEN}twister${NC}-rg"
 
