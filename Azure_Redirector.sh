@@ -1,4 +1,5 @@
 #!/bin/bash
+project_code=${RANDOM}
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 NC='\033[0m' # No Color
@@ -11,10 +12,10 @@ fi
 
 # Modify some files we will use later to test when the multithreading is complete
 # We will delete these later in the script
-echo n > vm1
-echo n > vm2
-echo n > first_finished
-echo n > second_finished
+echo n > ${project_code}-vm1
+echo n > ${project_code}-vm2
+echo n > ${project_code}-first_finished
+echo n > ${project_code}-second_finished
 
 builder_menu() {
 # This function will create a display for the end user to see what they have done
@@ -419,13 +420,13 @@ echo -e "${GREEN}Finished - ${VNIC2}${NC}"
 
 # This is some fancy multithreading
 # First it will run the first function and then the second function without waiting
-first_instance && echo y > first_finished & second_instance && echo y > second_finished
+first_instance && echo y > ${project_code}-first_finished & second_instance && echo y > ${project_code}-second_finished
 
-while [[ $(cat first_finished) != 'y' ]];
+while [[ $(cat ${project_code}-first_finished) != 'y' ]];
 do
 	sleep 1s
 done
-while [[ $(cat second_finished) != 'y' ]];
+while [[ $(cat ${project_code}-second_finished) != 'y' ]];
 do
 	sleep 1s
 done
@@ -492,21 +493,21 @@ echo -e "${NC}"
 echo -e "${GREEN}Finished - ${VMNAME2}${NC}"
 } 
    
-build_one && echo y > vm1 & build_two && echo y > vm2
+build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2
 
-while [[ $(cat vm1) != 'y' ]];
+while [[ $(cat ${project_code}-vm1) != 'y' ]];
 do
 	sleep 1s
 done
-while [[ $(cat vm2) != 'y' ]];
+while [[ $(cat ${project_code}-vm2) != 'y' ]];
 do
 	sleep 1s
 done
     
-rm -rf first_finished
-rm -rf second_finished
-rm -rf vm1
-rm -rf vm2
+rm -rf ${project_code}-first_finished
+rm -rf ${project_code}-second_finished
+rm -rf ${project_code}-vm1
+rm -rf ${project_code}-vm2
 
     
 # Grabbing IP Addresses
@@ -515,7 +516,7 @@ export VM_2_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RE
 export VM_1_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME} --query publicIps --output tsv)
 export VM_2_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query publicIps --output tsv)
 
-tee fe.sh << EOF
+tee ${project_code}-fe.sh << EOF
 #!/bin/bash
 
 sudo apt update && sudo apt upgrade -y
@@ -557,7 +558,7 @@ sudo sysctl -p
 exit
 EOF
 
-tee be.sh << EOF
+tee ${project_code}-be.sh << EOF
 #!/bin/bash
 #
 sudo apt update && sudo apt upgrade -y
@@ -605,19 +606,19 @@ clear
 
 ssh-keyscan -H ${VM_1_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
 
-scp -o StrictHostKeyChecking=no fe.sh azureuser@${VM_1_Public_IP_ADDRESS}:/tmp/
-scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} be.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no ${project_code}-fe.sh azureuser@${VM_1_Public_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} ${project_code}-be.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 
 clear
 
-ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} 'sudo bash /tmp/fe.sh && logout'
+ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} 'sudo bash /tmp/${project_code}-fe.sh && logout'
 clear
 
-ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} 'sudo bash /tmp/fe.sh && logout'
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} 'sudo bash /tmp/${project_code}-fe.sh && logout'
 
 clear
-rm -rf be.sh
-rm -rf fe.sh
+rm -rf ${project_code}-be.sh
+rm -rf ${project_code}-fe.sh
 clear
 echo
 echo -e " ${GREEN}Redirector complete:${NC}"
