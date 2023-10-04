@@ -1147,4 +1147,13 @@ cd ../../
 cd server_files/client_certs
 
 
+echo -e " Your Bastion Host IP is: ${GREEN}${VM_3_Public_IP_ADDRESS}${NC}"
+echo -e "     Frontend is accessible from the Bastion at ${GREEN}${VM_1_Private_IP_ADDRESS}${NC}"
+echo -e "     Backend is accessible from the Bastion at ${GREEN}${VM_2_Private_IP_ADDRESS}${NC}"
+echo
+echo -e "   ${RED}SSH Keys are needed${NC}, if you lose them you can regenerate them on the Azure Portal"
+echo -e "   By default the SSH key is utilizing ${GREEN}/home/${USER}/.ssh/id_rsa${NC} as the private key"
+echo
+echo -e " ${GREEN}Bastion Public IP${NC} is in the ${RED}same region as the backend IP${NC}"
 xdg-open .
+
