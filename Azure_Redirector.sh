@@ -20,8 +20,13 @@ fi
 # We will delete these later in the script
 echo n > ${project_code}-vm1
 echo n > ${project_code}-vm2
+echo n > ${project_code}-vm3
+echo n > ${project_code}-ssh1
+echo n > ${project_code}-ssh2
+echo n > ${project_code}-ssh3
 echo n > ${project_code}-first_finished
 echo n > ${project_code}-second_finished
+echo n > ${project_code}-third_finished
 
 builder_menu() {
 # This function will create a display for the end user to see what they have done
@@ -283,16 +288,20 @@ builder_variables
 clear
 VNET1=${SUBSCRIPTION_NAME}-${REGION}-FE-vnet
 VNET2=${SUBSCRIPTION_NAME}-${REGION2}-BE-vnet
+VNET3=${SUBSCRIPTION_NAME}-${REGION}-Bastion-vnet
 V_SUBNET1_NAME=FE-sub
 V_SUBNET1=10.0.101.0/24
 V_SUBNET2_NAME=BE-sub
 V_SUBNET2=10.1.102.0/24
 NSG1=${SUBSCRIPTION_NAME}-${REGION}-FE-nsg
 NSG2=${SUBSCRIPTION_NAME}-${REGION2}-BE-nsg
+NSG3=${SUBSCRIPTION_NAME}-${REGION}-Bastion-nsg
 VNIC1=${SUBSCRIPTION_NAME}-${REGION}-FE-vnic
 VNIC2=${SUBSCRIPTION_NAME}-${REGION2}-BE-vnic
+VNIC3=${SUBSCRIPTION_NAME}-${REGION}-Bastion-vnic
 VNIC1_IP=${SUBSCRIPTION_NAME}-${REGION}-FE-ip
 VNIC2_IP=${SUBSCRIPTION_NAME}-${REGION2}-BE-ip
+VNIC3_IP=${SUBSCRIPTION_NAME}-${REGION}-Bastion-ip
 VMNAME=REDIR_FE
 VMNAME2=REDIR_BE
 
@@ -325,20 +334,6 @@ az network nsg create \
     --name ${NSG1} > /dev/null
 echo -e "${NC}"
 echo -e "${GREEN}Finished - ${NSG1}${NC}"
-
-echo -e "${NC}Modification has initiated on - ${NSG1}${RED}"
-echo -e "${RED}"
-az network nsg rule create \
-    --resource-group ${RESOURCE_GROUP} \
-    --nsg-name ${NSG1} \
-    --name SSH-rule \
-    --priority 300 \
-    --destination-address-prefixes '*' \
-    --destination-port-ranges 22 \
-    --protocol Tcp \
-    --description "Allow SSH" > /dev/null
-echo -e "${NC}"
-echo -e "${GREEN}Finished modifying for SSH- ${NSG1}${NC}"
 
 echo -e "${NC}Modification has initiated on - ${NSG1}${RED}"
 echo -e "${RED}"
@@ -423,10 +418,58 @@ az network nic create \
 echo -e "${NC}"
 echo -e "${GREEN}Finished - ${VNIC2}${NC}"
 }
+third_instance() {
+    
+echo -e "${NC}Creation has begun on - ${NSG3}${RED}"
+echo -e "${RED}"
+az network nsg create \
+    --resource-group ${RESOURCE_GROUP} \
+    --location ${REGION2} \
+    --name ${NSG3} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${NSG3}${NC}"
+
+echo -e "${NC}Creation has begun on - ${VNIC3_IP}${RED}"
+echo -e "${RED}"
+az network public-ip create \
+    --resource-group ${RESOURCE_GROUP} \
+    --name ${VNIC3_IP} \
+    --sku Standard \
+    --location ${REGION2} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC3_IP}${NC}"
+
+echo -e "${NC}Creation has begun on - ${VNIC3}${RED}"
+echo -e "${RED}"
+az network nic create \
+    --resource-group ${RESOURCE_GROUP} \
+    --name ${VNIC3} \
+    --vnet-name ${VNET2} \
+    --location ${REGION2} \
+    --subnet ${V_SUBNET2_NAME} \
+    --network-security-group ${NSG3} \
+    --public-ip-address ${VNIC3_IP}  > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC3}${NC}"
+
+echo -e "${NC}Modification has initiated on - ${NSG3}${RED}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG3} \
+    --name SSH-rule \
+    --priority 300 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 22 \
+    --protocol Tcp \
+    --description "Allow SSH" > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished modifying for SSH - ${NSG3}${NC}"
+}
 
 # This is some fancy multithreading
 # First it will run the first function and then the second function without waiting
-first_instance && echo y > ${project_code}-first_finished & second_instance && echo y > ${project_code}-second_finished
+first_instance && echo y > ${project_code}-first_finished & second_instance && echo y > ${project_code}-second_finished & third_instance && echo y > ${project_code}-third_finished
 
 while [[ $(cat ${project_code}-first_finished) != 'y' ]];
 do
@@ -436,6 +479,14 @@ while [[ $(cat ${project_code}-second_finished) != 'y' ]];
 do
 	sleep 1s
 done
+while [[ $(cat ${project_code}-third_finished) != 'y' ]];
+do
+	sleep 1s
+done
+
+rm -rf ${project_code}-first_finished
+rm -rf ${project_code}-second_finished
+rm -rf ${project_code}-third_finished
 
 vNet1Id=$(az network vnet show \
   --resource-group ${RESOURCE_GROUP} \
@@ -447,6 +498,7 @@ vNet2Id=$(az network vnet show \
   --name ${VNET2} \
   --query id \
   --out tsv)
+  
 echo -e "${NC}Peering has begun between - ${VNET1} and ${VNET2}${RED}"
 echo -e "${RED}"
 az network vnet peering create \
@@ -466,6 +518,10 @@ az network vnet peering create \
 echo -e "${NC}"
 echo -e "${GREEN}Finished Peering - ${VNET1} and ${VNET2}${NC}"
  
+ 
+ 
+
+ 
 build_one() {
     
 # Create VM
@@ -476,7 +532,7 @@ az vm create \
     --name ${VMNAME} \
     --location ${REGION} \
     --image "Ubuntu2204" \
-    --size Standard_DS3_v2 \
+    --size Standard_B1s \
     --admin-username azureuser \
     --generate-ssh-keys \
     --nics ${VNIC1} > /dev/null
@@ -491,15 +547,32 @@ az vm create \
     --name ${VMNAME2} \
     --location ${REGION2} \
     --image "Ubuntu2204" \
-    --size Standard_DS3_v2 \
+    --size Standard_B1s \
     --admin-username azureuser \
     --generate-ssh-keys \
     --nics ${VNIC2} > /dev/null
 echo -e "${NC}"
 echo -e "${GREEN}Finished - ${VMNAME2}${NC}"
 } 
+build_three() { 
+ # Building the Bastion Host
+echo -e "${NC}Creation has begun on - Bastion${RED}"
+echo -e "${RED}"
+az vm create \
+    --resource-group ${RESOURCE_GROUP} \
+    --name Bastion \
+    --location ${REGION2} \
+    --image "Ubuntu2204" \
+    --size Standard_B1s \
+    --admin-username azureuser \
+    --generate-ssh-keys \
+    --nics ${VNIC3} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - Bastion${NC}"
+ }
+ 
    
-build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2
+build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2 & build_three && echo y > ${project_code}-vm3
 
 while [[ $(cat ${project_code}-vm1) != 'y' ]];
 do
@@ -509,18 +582,22 @@ while [[ $(cat ${project_code}-vm2) != 'y' ]];
 do
 	sleep 1s
 done
-    
-rm -rf ${project_code}-first_finished
-rm -rf ${project_code}-second_finished
+while [[ $(cat ${project_code}-vm3) != 'y' ]];
+do
+	sleep 1s
+done
+
 rm -rf ${project_code}-vm1
 rm -rf ${project_code}-vm2
-
+rm -rf ${project_code}-vm3
     
 # Grabbing IP Addresses
 export VM_1_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME} --query privateIps --output tsv)
 export VM_2_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query privateIps --output tsv)
+export VM_3_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name Bastion --query privateIps --output tsv)
 export VM_1_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME} --query publicIps --output tsv)
 export VM_2_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query publicIps --output tsv)
+export VM_3_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name Bastion --query publicIps --output tsv)
 
 tee ${project_code}-fe.sh << EOF
 #!/bin/bash
@@ -544,7 +621,7 @@ sudo tee -a /etc/iptables/rules.v4 << EOFFF
 -A INPUT -m conntrack --ctstate INVALID -j DROP
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
--A INPUT -s 0.0.0.0/0 -p tcp --dport 22 -j ACCEPT
+-A INPUT -s ${VM_3_Private_IP_ADDRESS}/32 -p tcp --dport 22 -j ACCEPT
 COMMIT
 *nat
 :PREROUTING ACCEPT [0:0]
@@ -586,7 +663,7 @@ sudo tee -a /etc/iptables/rules.v4 << EOFFF
 -A INPUT -m conntrack --ctstate INVALID -j DROP
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
--A INPUT -s ${VM_1_Private_IP_ADDRESS}/32 -p tcp --dport 22 -j ACCEPT
+-A INPUT -s ${VM_3_Private_IP_ADDRESS}/32 -p tcp --dport 22 -j ACCEPT
 COMMIT
 *nat
 :PREROUTING ACCEPT [0:0]
@@ -608,21 +685,84 @@ sudo sysctl -p
 
 exit
 EOF
+
+tee ${project_code}-bastion.sh << EOF
+#!/bin/bash
+#
+sudo apt update && sudo apt upgrade -y
+
+# Adding IPTables Persistent Options
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean false | sudo debconf-set-selections
+sudo apt install iptables-persistent -y
+
+hostname=\$(cat /etc/hostname)
+sudo sed -i "s/localhost/\${hostname}/g" /etc/hosts
+
+# Modify the IPTables Rules Page
+sudo tee -a /etc/iptables/rules.v4 << EOFFF
+*filter
+:INPUT DROP [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m conntrack --ctstate INVALID -j DROP
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -s 0.0.0.0/0 -p tcp --dport 22 -j ACCEPT
+COMMIT
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -d ${VM_1_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
+-A POSTROUTING -d ${VM_2_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
+COMMIT
+*filter
+EOFFF
+
+sudo iptables-restore /etc/iptables/rules.v4
+
+
+# Enabling IP Forwarding
+sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+sudo sysctl -p
+
+exit
+EOF
 clear
 
-ssh-keyscan -H ${VM_1_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
+ssh-keyscan -H ${VM_3_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
+scp -o StrictHostKeyChecking=no ${project_code}-bastion.sh azureuser@${VM_3_Public_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} ${project_code}-fe.sh azureuser@${VM_1_Private_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} ${project_code}-be.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 
-scp -o StrictHostKeyChecking=no ${project_code}-fe.sh azureuser@${VM_1_Public_IP_ADDRESS}:/tmp/
-scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} ${project_code}-be.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
+clear
+
+ssh -o StrictHostKeyChecking=no azureuser@${VM_3_Public_IP_ADDRESS} "sudo bash /tmp/${project_code}-bastion.sh && exit" && echo y > ${project_code}-ssh1 & \
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@${VM_1_Private_IP_ADDRESS} "sudo bash /tmp/${project_code}-fe.sh && exit && sudo reboot" && echo y > ${project_code}-ssh2 & \
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} "sudo bash /tmp/${project_code}-be.sh && exit && sudo reboot" && echo y > ${project_code}-ssh3
 
 clear
 
-ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} "sudo bash /tmp/${project_code}-fe.sh && logout"
-clear
+while [[ $(cat ${project_code}-ssh1) != 'y' ]];
+do
+	sleep 1s
+done
+while [[ $(cat ${project_code}-ssh2) != 'y' ]];
+do
+	sleep 1s
+done
+while [[ $(cat ${project_code}-ssh3) != 'y' ]];
+do
+	sleep 1s
+done
 
-ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} "sudo bash /tmp/${project_code}-fe.sh && logout"
+rm -rf ${project_code}-ssh1
+rm -rf ${project_code}-ssh2
+rm -rf ${project_code}-ssh3
 
-clear
+rm -rf ${project_code}-bastion.sh
 rm -rf ${project_code}-be.sh
 rm -rf ${project_code}-fe.sh
 clear
@@ -630,5 +770,14 @@ echo
 echo -e " ${GREEN}Redirector complete:${NC}"
 echo -e " Packets sent to ${GREEN}${VM_1_Public_IP_ADDRESS}:${ENDPORT} / ${PROTOCOL}${NC}"
 echo -e "    will get ${RED}redirected to${NC} ${GREEN}${ENDPOINT}:${ENDPORT} / ${PROTOCOL}${NC}"
+echo
+echo -e " Your Bastion Host IP is: ${GREEN}${VM_3_Public_IP_ADDRESS}${NC}"
+echo -e "     Frontend is accessible from the Bastion at ${GREEN}${VM_1_Private_IP_ADDRESS}${NC}"
+echo -e "     Backend is accessible from the Bastion at ${GREEN}${VM_2_Private_IP_ADDRESS}${NC}"
+echo
+echo -e "   ${RED}SSH Keys are needed${NC}, if you lose them you can regenerate them on the Azure Portal"
+echo -e "   By default the SSH key is utilizing ${GREEN}/home/${USER}/.ssh/id_rsa${NC} as the private key"
+echo
+echo -e " ${GREEN}Bastion Public IP${NC} is in the ${RED}same region as the backend IP${NC}"
 echo
 echo
