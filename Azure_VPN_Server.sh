@@ -20,13 +20,13 @@ fi
 # We will delete these later in the script
 echo n > ${project_code}-vm1
 echo n > ${project_code}-vm2
+echo n > ${project_code}-vm3
+echo n > ${project_code}-ssh1
+echo n > ${project_code}-ssh2
+echo n > ${project_code}-ssh3
 echo n > ${project_code}-first_finished
 echo n > ${project_code}-second_finished
-
-
-
-
-
+echo n > ${project_code}-third_finished
 
 
 variable_reset() {
@@ -195,6 +195,7 @@ echo "##########################################################################
 	fi
  	echo
  	echo "Validating Region Choice..."
+ 	
 	output=$(az account list-locations -o table)
 	if [[ "${output}" != *${REGION}* ]];
 	then
@@ -205,6 +206,17 @@ echo "##########################################################################
 		read -p "Press ENTER to try again" ENTER
 	     	builder_variables
 	fi
+	region_skus=$(az vm list-sizes --location "${REGION}" -o table)
+ 	if [[ ${region_skus} != *Standard_B1s* ]]; 
+ 	then 
+		clear
+	 	echo -e "${RED} ${REGION} - doesn't support the VM SKU type!${NC}"
+	  	echo -e "Please pick a ${GREEN}different region from the list${NC}"
+	   	echo
+		read -p "Press ENTER to try again" ENTER
+	     	builder_variables
+ 	fi
+ 	
   	echo
  	echo "Grabbing Resource Groups in your region..."
   	echo
@@ -303,6 +315,16 @@ echo "##########################################################################
 		read -p "Press ENTER to try again" ENTER
 	     	builder_variables
 	fi
+	region_skus=$(az vm list-sizes --location "${REGION2}" -o table)
+ 	if [[ ${region_skus} != *Standard_B1s* ]]; 
+ 	then 
+		clear
+	 	echo -e "${RED} ${REGION2} - doesn't support the VM SKU type!${NC}"
+	  	echo -e "Please pick a ${GREEN}different region from the list${NC}"
+	   	echo
+		read -p "Press ENTER to try again" ENTER
+	     	builder_variables
+ 	fi
 	builder_menu
 
 	echo " What is your VPN Server's Name (mwr)?"
@@ -373,18 +395,23 @@ builder_variables
 RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-rg
 VNET1=${SUBSCRIPTION_NAME}-${REGION}-FE-vnet
 VNET2=${SUBSCRIPTION_NAME}-${REGION2}-BE-vnet
+VNET3=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-vnet
 V_SUBNET1_NAME=FE-sub
 V_SUBNET1=10.0.101.0/24
 V_SUBNET2_NAME=BE-sub
 V_SUBNET2=10.1.102.0/24
 NSG1=${SUBSCRIPTION_NAME}-${REGION}-FE-nsg
 NSG2=${SUBSCRIPTION_NAME}-${REGION2}-BE-nsg
+NSG3=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-nsg
 VNIC1=${SUBSCRIPTION_NAME}-${REGION}-FE-vnic
 VNIC2=${SUBSCRIPTION_NAME}-${REGION2}-BE-vnic
+VNIC3=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-vnic
 VNIC1_IP=${SUBSCRIPTION_NAME}-${REGION}-FE-ip
 VNIC2_IP=${SUBSCRIPTION_NAME}-${REGION2}-BE-ip
+VNIC3_IP=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-ip
 VMNAME=VPN_FE
 VMNAME2=VPN_BE
+
 VPN_PORT=${port}
 clear
 # Create a new Resource Group
@@ -417,20 +444,6 @@ az network nsg create \
     --name ${NSG1} > /dev/null
 echo -e "${NC}"
 echo -e "${GREEN}Finished - ${NSG1}${NC}"
-
-echo -e "${NC}Modification has initiated on - ${NSG1}${RED}"
-echo -e "${RED}"
-az network nsg rule create \
-    --resource-group ${RESOURCE_GROUP} \
-    --nsg-name ${NSG1} \
-    --name SSH-rule \
-    --priority 300 \
-    --destination-address-prefixes '*' \
-    --destination-port-ranges 22 \
-    --protocol Tcp \
-    --description "Allow SSH" > /dev/null
-echo -e "${NC}"
-echo -e "${GREEN}Finished modifying for SSH- ${NSG1}${NC}"
 
 echo -e "${NC}Modification has initiated on - ${NSG1}${RED}"
 echo -e "${RED}"
@@ -519,9 +532,60 @@ echo -e "${GREEN}Finished - ${VNIC2}${NC}"
  
 }
 
+third_instance() {
+    
+echo -e "${NC}Creation has begun on - ${NSG3}${RED}"
+echo -e "${RED}"
+az network nsg create \
+    --resource-group ${RESOURCE_GROUP} \
+    --location ${REGION2} \
+    --name ${NSG3} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${NSG3}${NC}"
+
+echo -e "${NC}Creation has begun on - ${VNIC3_IP}${RED}"
+echo -e "${RED}"
+az network public-ip create \
+    --resource-group ${RESOURCE_GROUP} \
+    --name ${VNIC3_IP} \
+    --sku Standard \
+    --location ${REGION2} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC3_IP}${NC}"
+
+echo -e "${NC}Creation has begun on - ${VNIC3}${RED}"
+echo -e "${RED}"
+az network nic create \
+    --resource-group ${RESOURCE_GROUP} \
+    --name ${VNIC3} \
+    --vnet-name ${VNET2} \
+    --location ${REGION2} \
+    --subnet ${V_SUBNET2_NAME} \
+    --network-security-group ${NSG3} \
+    --public-ip-address ${VNIC3_IP}  > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - ${VNIC3}${NC}"
+
+echo -e "${NC}Modification has initiated on - ${NSG3}${RED}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG3} \
+    --name SSH-rule \
+    --priority 300 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 22 \
+    --protocol Tcp \
+    --description "Allow SSH" > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished modifying for SSH - ${NSG3}${NC}"
+}
+
+
+
 # This is some fancy multithreading
 # First it will run the first function and then the second function without waiting
-first_instance && echo y > ${project_code}-first_finished & second_instance && echo y > ${project_code}-second_finished
+first_instance && echo y > ${project_code}-first_finished & second_instance && echo y > ${project_code}-second_finished & third_instance && echo y > ${project_code}-third_finished
 
 while [[ $(cat ${project_code}-first_finished) != 'y' ]];
 do
@@ -531,6 +595,14 @@ while [[ $(cat ${project_code}-second_finished) != 'y' ]];
 do
 	sleep 1s
 done
+while [[ $(cat ${project_code}-third_finished) != 'y' ]];
+do
+	sleep 1s
+done
+
+rm -rf ${project_code}-first_finished
+rm -rf ${project_code}-second_finished
+rm -rf ${project_code}-third_finished
 
 vNet1Id=$(az network vnet show \
   --resource-group ${RESOURCE_GROUP} \
@@ -571,7 +643,7 @@ az vm create \
     --name ${VMNAME} \
     --location ${REGION} \
     --image "Ubuntu2204" \
-    --size Standard_DS3_v2 \
+    --size Standard_B1s \
     --admin-username azureuser \
     --generate-ssh-keys \
     --nics ${VNIC1} > /dev/null
@@ -586,7 +658,7 @@ az vm create \
     --name ${VMNAME2} \
     --location ${REGION2} \
     --image "Ubuntu2204" \
-    --size Standard_DS3_v2 \
+    --size Standard_B1s \
     --admin-username azureuser \
     --generate-ssh-keys \
     --nics ${VNIC2} > /dev/null
@@ -594,7 +666,25 @@ echo -e "${NC}"
 echo -e "${GREEN}Finished - ${VMNAME2}${NC}"
 } 
    
-build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2
+build_three() { 
+ # Building the Bastion Host
+echo -e "${NC}Creation has begun on - Bastion${RED}"
+echo -e "${RED}"
+az vm create \
+    --resource-group ${RESOURCE_GROUP} \
+    --name Bastion \
+    --location ${REGION2} \
+    --image "Ubuntu2204" \
+    --size Standard_B1s \
+    --admin-username azureuser \
+    --generate-ssh-keys \
+    --nics ${VNIC3} > /dev/null
+echo -e "${NC}"
+echo -e "${GREEN}Finished - Bastion${NC}"
+ }
+ 
+   
+build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2 & build_three && echo y > ${project_code}-vm3
 
 while [[ $(cat ${project_code}-vm1) != 'y' ]];
 do
@@ -604,20 +694,63 @@ while [[ $(cat ${project_code}-vm2) != 'y' ]];
 do
 	sleep 1s
 done
-    
-rm -rf ${project_code}-first_finished
-rm -rf ${project_code}-second_finished
+while [[ $(cat ${project_code}-vm3) != 'y' ]];
+do
+	sleep 1s
+done
+
+
+
 rm -rf ${project_code}-vm1
 rm -rf ${project_code}-vm2
-
+rm -rf ${project_code}-vm3
     
 # Grabbing IP Addresses
 export VM_1_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME} --query privateIps --output tsv)
 export VM_2_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query privateIps --output tsv)
+export VM_3_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name Bastion --query privateIps --output tsv)
 export VM_1_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME} --query publicIps --output tsv)
 export VM_2_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query publicIps --output tsv)
+export VM_3_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name Bastion --query publicIps --output tsv)
+
+
+
+
 
 vpn_ip=${VM_1_Public_IP_ADDRESS}
+
+if [[ -z ${VM_1_Private_IP_ADDRESS} ]];
+then
+	echo && echo && echo && echo
+	echo "Frontend VM Failed to Deploy."
+	echo "${REGION} - was unable to deploy your VM, pick another Region"
+	echo "Do you want to delete the failed resource group - ${RESOURCE_GROUP}"
+	az group delete -n ${RESOURCE_GROUP} --force-deletion-types Microsoft.Compute/virtualMachines
+	exit
+fi
+if [[ -z ${VM_2_Private_IP_ADDRESS} ]];
+then
+	echo && echo && echo && echo
+	echo "Backend VM Failed to Deploy."
+	echo "${REGION2} - was unable to deploy your VM, pick another Region"
+	echo "Do you want to delete the failed resource group - ${RESOURCE_GROUP}"
+	az group delete -n ${RESOURCE_GROUP} --force-deletion-types Microsoft.Compute/virtualMachines
+	exit
+fi
+if [[ -z ${VM_3_Private_IP_ADDRESS} ]];
+then
+	echo && echo && echo && echo
+	echo "Bastion VM Failed to Deploy."
+	echo "${REGION2} - was unable to deploy your VM, pick another Region"
+	echo "Do you want to delete the failed resource group - ${RESOURCE_GROUP}"
+	az group delete -n ${RESOURCE_GROUP} --force-deletion-types Microsoft.Compute/virtualMachines
+	exit
+fi
+
+
+
+
+
 
 subnet_config_builder() {
 # This function generates the directives for the OpenvVPN Configurations
@@ -820,7 +953,7 @@ sudo tee -a /etc/iptables/rules.v4 << EOFFF
 -A INPUT -m conntrack --ctstate INVALID -j DROP
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
--A INPUT -s 0.0.0.0/0 -p tcp --dport 22 -j ACCEPT
+-A INPUT -s ${VM_3_Private_IP_ADDRESS}/32 -p tcp --dport 22 -j ACCEPT
 COMMIT
 *nat
 :PREROUTING ACCEPT [0:0]
@@ -866,7 +999,7 @@ sudo tee -a /etc/iptables/rules.v4 << EOFFF
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -s ${VM_1_Private_IP_ADDRESS}/32 -p udp --dport ${port} -j ACCEPT
--A INPUT -s ${VM_1_Private_IP_ADDRESS}/32 -p tcp --dport 22 -j ACCEPT
+-A INPUT -s ${VM_3_Private_IP_ADDRESS}/32 -p tcp --dport 22 -j ACCEPT
 COMMIT
 *nat
 :PREROUTING ACCEPT [0:0]
@@ -895,6 +1028,50 @@ sudo systemctl start openvpn@${server_name}_server
 sudo systemctl enable openvpn@${server_name}_server
 exit
 EOF
+tee bastion.sh << EOF
+#!/bin/bash
+#
+sudo apt update && sudo apt upgrade -y
+
+# Adding IPTables Persistent Options
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean false | sudo debconf-set-selections
+sudo apt install iptables-persistent -y
+
+hostname=\$(cat /etc/hostname)
+sudo sed -i "s/localhost/\${hostname}/g" /etc/hosts
+
+# Modify the IPTables Rules Page
+sudo tee -a /etc/iptables/rules.v4 << EOFFF
+*filter
+:INPUT DROP [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m conntrack --ctstate INVALID -j DROP
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -s 0.0.0.0/0 -p tcp --dport 22 -j ACCEPT
+COMMIT
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -d ${VM_1_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
+-A POSTROUTING -d ${VM_2_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
+COMMIT
+*filter
+EOFFF
+
+sudo iptables-restore /etc/iptables/rules.v4
+
+
+# Enabling IP Forwarding
+sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+sudo sysctl -p
+
+exit
+EOF
 clear
 }
 
@@ -920,21 +1097,51 @@ mv *.ovpn ./server_files/client_certs/
 cd server_files
 
 
-ssh-keyscan -H ${VM_1_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
+ssh-keyscan -H ${VM_3_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
+scp -o StrictHostKeyChecking=no bastion.sh azureuser@${VM_3_Public_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} fe_deployment_script.sh azureuser@${VM_1_Private_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} be_deployment_script.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 
 
-
-
-scp -o StrictHostKeyChecking=no fe_deployment_script.sh azureuser@${VM_1_Public_IP_ADDRESS}:/tmp/
-scp -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} be_deployment_script.sh ${server_name}_server.conf azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 cd client_certs
 
+
+
+
+
+
+
+
+
+
 clear
-echo
-ssh -o StrictHostKeyChecking=no azureuser@${VM_1_Public_IP_ADDRESS} 'sudo bash /tmp/fe_deployment_script.sh && logout'
+
+ssh -o StrictHostKeyChecking=no azureuser@${VM_3_Public_IP_ADDRESS} "sudo bash /tmp/bastion.sh && exit" && echo y > ${project_code}-ssh1 & \
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@${VM_1_Private_IP_ADDRESS} "sudo bash /tmp/fe_deployment_script.sh && exit && sudo reboot" && echo y > ${project_code}-ssh2 & \
+ssh -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} "sudo bash /tmp/be_deployment_script.sh && exit && sudo reboot" && echo y > ${project_code}-ssh3
+
 clear
-echo
-ssh -o StrictHostKeyChecking=no -J azureuser@${VM_1_Public_IP_ADDRESS} azureuser@${VM_2_Private_IP_ADDRESS} 'sudo bash /tmp/be_deployment_script.sh && logout'
+
+while [[ $(cat ${project_code}-ssh1) != 'y' ]];
+do
+	sleep 1s
+done
+while [[ $(cat ${project_code}-ssh2) != 'y' ]];
+do
+	sleep 1s
+done
+while [[ $(cat ${project_code}-ssh3) != 'y' ]];
+do
+	sleep 1s
+done
+rm -rf ${project_code}-ssh1
+rm -rf ${project_code}-ssh2
+rm -rf ${project_code}-ssh3
+
+cd server_files/client_certs
+rm -rf ../bastion.sh
+rm -rf ../be_deployment_script.sh
+rm -rf ../fe_deployment_script.sh
 
 clear
 cd ../../
