@@ -16,17 +16,7 @@ then
 	az login
 fi
 
-# Modify some files we will use later to test when the multithreading is complete
-# We will delete these later in the script
-echo n > ${project_code}-vm1
-echo n > ${project_code}-vm2
-echo n > ${project_code}-vm3
-echo n > ${project_code}-ssh1
-echo n > ${project_code}-ssh2
-echo n > ${project_code}-ssh3
-echo n > ${project_code}-first_finished
-echo n > ${project_code}-second_finished
-echo n > ${project_code}-third_finished
+
 
 builder_menu() {
 # This function will create a display for the end user to see what they have done
@@ -487,6 +477,15 @@ echo -e "${NC}"
 echo -e "${GREEN}Finished modifying for SSH - ${NSG3}${NC}"
 }
 
+
+# Modify some files we will use later to test when the multithreading is complete
+# We will delete these later in the script
+
+
+echo n > ${project_code}-first_finished
+echo n > ${project_code}-second_finished
+echo n > ${project_code}-third_finished
+
 # This is some fancy multithreading
 # First it will run the first function and then the second function without waiting
 first_instance && echo y > ${project_code}-first_finished & second_instance && echo y > ${project_code}-second_finished & third_instance && echo y > ${project_code}-third_finished
@@ -591,7 +590,10 @@ echo -e "${NC}"
 echo -e "${GREEN}Finished - Bastion${NC}"
  }
  
-   
+echo n > ${project_code}-vm1
+echo n > ${project_code}-vm2
+echo n > ${project_code}-vm3
+
 build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2 & build_three && echo y > ${project_code}-vm3
 
 while [[ $(cat ${project_code}-vm1) != 'y' ]];
@@ -799,6 +801,9 @@ scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} ${project
 scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} ${project_code}-be.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 
 clear
+echo n > ${project_code}-ssh1
+echo n > ${project_code}-ssh2
+echo n > ${project_code}-ssh3
 
 ssh -o StrictHostKeyChecking=no azureuser@${VM_3_Public_IP_ADDRESS} "sudo bash /tmp/${project_code}-bastion.sh && exit" && echo y > ${project_code}-ssh1 & \
 ssh -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@${VM_1_Private_IP_ADDRESS} "sudo bash /tmp/${project_code}-fe.sh && exit && sudo reboot" && echo y > ${project_code}-ssh2 & \
