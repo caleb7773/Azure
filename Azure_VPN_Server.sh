@@ -16,17 +16,6 @@ then
 	az login
 fi
 
-# Modify some files we will use later to test when the multithreading is complete
-# We will delete these later in the script
-echo n > ${project_code}-vm1
-echo n > ${project_code}-vm2
-echo n > ${project_code}-vm3
-echo n > ${project_code}-ssh1
-echo n > ${project_code}-ssh2
-echo n > ${project_code}-ssh3
-echo n > ${project_code}-first_finished
-echo n > ${project_code}-second_finished
-echo n > ${project_code}-third_finished
 
 
 variable_reset() {
@@ -581,7 +570,9 @@ echo -e "${NC}"
 echo -e "${GREEN}Finished modifying for SSH - ${NSG3}${NC}"
 }
 
-
+echo n > ${project_code}-first_finished
+echo n > ${project_code}-second_finished
+echo n > ${project_code}-third_finished
 
 # This is some fancy multithreading
 # First it will run the first function and then the second function without waiting
@@ -633,6 +624,10 @@ az network vnet peering create \
 echo -e "${NC}"
 echo -e "${GREEN}Finished Peering - ${VNET1} and ${VNET2}${NC}"
  
+ 
+
+ 
+ 
 build_one() {
     
 # Create VM
@@ -683,7 +678,9 @@ echo -e "${NC}"
 echo -e "${GREEN}Finished - Bastion${NC}"
  }
  
-   
+echo n > ${project_code}-vm1
+echo n > ${project_code}-vm2
+echo n > ${project_code}-vm3  
 build_one && echo y > ${project_code}-vm1 & build_two && echo y > ${project_code}-vm2 & build_three && echo y > ${project_code}-vm3
 
 while [[ $(cat ${project_code}-vm1) != 'y' ]];
@@ -1110,7 +1107,9 @@ cd client_certs
 
 
 
-
+echo n > ${project_code}-ssh1
+echo n > ${project_code}-ssh2
+echo n > ${project_code}-ssh3
 
 
 
