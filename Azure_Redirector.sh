@@ -151,6 +151,16 @@ echo "##########################################################################
 		read -p "Press ENTER to try again" ENTER
 	     	builder_variables
 	fi
+	region_skus=$(az vm list-sizes --location "${REGION}" -o table)
+ 	if [[ ${region_skus} != *Standard_B1s* ]]; 
+ 	then 
+		clear
+	 	echo -e "${RED} ${REGION} - doesn't support the VM SKU type!${NC}"
+	  	echo -e "Please pick a ${GREEN}different region from the list${NC}"
+	   	echo
+		read -p "Press ENTER to try again" ENTER
+	     	builder_variables
+ 	fi
   	echo
  	echo "Grabbing Resource Groups in your region..."
   	echo
@@ -249,6 +259,16 @@ echo "##########################################################################
 		read -p "Press ENTER to try again" ENTER
 	     	builder_variables
 	fi
+	region_skus=$(az vm list-sizes --location "${REGION2}" -o table)
+ 	if [[ ${region_skus} != *Standard_B1s* ]]; 
+ 	then 
+		clear
+	 	echo -e "${RED} ${REGION2} - doesn't support the VM SKU type!${NC}"
+	  	echo -e "Please pick a ${GREEN}different region from the list${NC}"
+	   	echo
+		read -p "Press ENTER to try again" ENTER
+	     	builder_variables
+ 	fi
 	builder_menu
 	echo
 	echo -e " Your endpoint is the service you are trying ${GREEN}to reach out to${NC}"
@@ -288,20 +308,20 @@ builder_variables
 clear
 VNET1=${SUBSCRIPTION_NAME}-${REGION}-FE-vnet
 VNET2=${SUBSCRIPTION_NAME}-${REGION2}-BE-vnet
-VNET3=${SUBSCRIPTION_NAME}-${REGION}-Bastion-vnet
+VNET3=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-vnet
 V_SUBNET1_NAME=FE-sub
 V_SUBNET1=10.0.101.0/24
 V_SUBNET2_NAME=BE-sub
 V_SUBNET2=10.1.102.0/24
 NSG1=${SUBSCRIPTION_NAME}-${REGION}-FE-nsg
 NSG2=${SUBSCRIPTION_NAME}-${REGION2}-BE-nsg
-NSG3=${SUBSCRIPTION_NAME}-${REGION}-Bastion-nsg
+NSG3=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-nsg
 VNIC1=${SUBSCRIPTION_NAME}-${REGION}-FE-vnic
 VNIC2=${SUBSCRIPTION_NAME}-${REGION2}-BE-vnic
-VNIC3=${SUBSCRIPTION_NAME}-${REGION}-Bastion-vnic
+VNIC3=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-vnic
 VNIC1_IP=${SUBSCRIPTION_NAME}-${REGION}-FE-ip
 VNIC2_IP=${SUBSCRIPTION_NAME}-${REGION2}-BE-ip
-VNIC3_IP=${SUBSCRIPTION_NAME}-${REGION}-Bastion-ip
+VNIC3_IP=${SUBSCRIPTION_NAME}-${REGION2}-Bastion-ip
 VMNAME=REDIR_FE
 VMNAME2=REDIR_BE
 
@@ -598,6 +618,47 @@ export VM_3_Private_IP_ADDRESS=$(az vm show --show-details --resource-group ${RE
 export VM_1_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME} --query publicIps --output tsv)
 export VM_2_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query publicIps --output tsv)
 export VM_3_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name Bastion --query publicIps --output tsv)
+
+
+
+
+
+
+
+if [[ -z ${VM_1_Private_IP_ADDRESS} ]];
+then
+	echo && echo && echo && echo
+	echo "Frontend VM Failed to Deploy."
+	echo "${REGION} - was unable to deploy your VM, pick another Region"
+	echo "Do you want to delete the failed resource group - ${RESOURCE_GROUP}"
+	az group delete -n ${RESOURCE_GROUP} --force-deletion-types Microsoft.Compute/virtualMachines
+	exit
+fi
+if [[ -z ${VM_2_Private_IP_ADDRESS} ]];
+then
+	echo && echo && echo && echo
+	echo "Backend VM Failed to Deploy."
+	echo "${REGION2} - was unable to deploy your VM, pick another Region"
+	echo "Do you want to delete the failed resource group - ${RESOURCE_GROUP}"
+	az group delete -n ${RESOURCE_GROUP} --force-deletion-types Microsoft.Compute/virtualMachines
+	exit
+fi
+if [[ -z ${VM_3_Private_IP_ADDRESS} ]];
+then
+	echo && echo && echo && echo
+	echo "Bastion VM Failed to Deploy."
+	echo "${REGION2} - was unable to deploy your VM, pick another Region"
+	echo "Do you want to delete the failed resource group - ${RESOURCE_GROUP}"
+	az group delete -n ${RESOURCE_GROUP} --force-deletion-types Microsoft.Compute/virtualMachines
+	exit
+fi
+
+
+
+
+
+
+
 
 tee ${project_code}-fe.sh << EOF
 #!/bin/bash
