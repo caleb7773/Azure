@@ -1097,7 +1097,7 @@ cd server_files
 ssh-keyscan -H ${VM_3_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
 scp -o StrictHostKeyChecking=no bastion.sh azureuser@${VM_3_Public_IP_ADDRESS}:/tmp/
 scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} fe_deployment_script.sh azureuser@${VM_1_Private_IP_ADDRESS}:/tmp/
-scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} be_deployment_script.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
+scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} ${server_name}_server.conf be_deployment_script.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 
 
 cd client_certs
