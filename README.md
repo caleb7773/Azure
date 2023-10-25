@@ -9,7 +9,7 @@ sudo apt update -y && sudo apt upgrade -y
 ```
 #### Install GIT and Curl
 ```
-sudo apt install git curl -y
+sudo apt install openvpn git curl -y
 ```
 #### Install Azure CLI
 ```
