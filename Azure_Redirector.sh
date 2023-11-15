@@ -240,7 +240,7 @@ echo "##########################################################################
 	then
 		PROJECT=twister
 	fi
-	RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-rg
+	RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-TP-rg
    	echo
  	echo "Validating Resource Group Choice..."
 	output=$(az group show --name ${RESOURCE_GROUP} 2> /dev/null)
