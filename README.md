@@ -7,7 +7,7 @@ Please be a gem and don't try anything else...
 ```
 sudo apt update -y && sudo apt upgrade -y
 ```
-#### Install GIT and Curl
+#### Install GIT and Curl and OpenVPN
 ```
 sudo apt install openvpn git curl -y
 ```
