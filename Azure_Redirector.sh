@@ -9,6 +9,65 @@ project_code=${RANDOM}
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 NC='\033[0m' # No Color
+
+
+# Kill the script if someone runs it as root
+
+if [[ $(id -u) == 0 ]];
+then
+	echo
+	echo "Do not run this as root you joker!"
+	exit 1
+fi
+
+# Check dependancies
+
+openvpn --version
+if [[ $? != 0 ]];
+then
+	echo " OpenVPN Missing... "
+	sudo apt update -y && sudo apt upgrade -y
+	sudo apt install openvpn -y
+fi
+
+git --version
+if [[ $? != 0 ]];
+then
+	echo " Git Missing... "
+	sudo apt update -y && sudo apt upgrade -y
+	sudo apt install git -y
+fi
+
+curl --version
+if [[ $? != 0 ]];
+then
+	echo " Curl Missing... "
+	sudo apt update -y && sudo apt upgrade -y
+	sudo apt install curl -y
+fi
+
+az --version
+if [[ $? != 0 ]];
+then
+	echo " AZ CLI Missing... "
+	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+fi
+
+# Generate SSH Key if it does not exist
+
+if [[ -f ~/.ssh/id_rsa ]]; 
+then 
+	echo "SSH Keyfile exists"
+else 
+	echo "SSH Keyfile does not exist"
+	ssh-keygen -N "" -o -f ~/.ssh/id_rsa
+fi
+
+
+
+
+
+
 # Connect to Azure CLI
 az account show
 if ! [[ ${?} == 0 ]];
