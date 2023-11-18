@@ -941,6 +941,10 @@ done
 # This is temporary until I can find a better solution to avoid prompts
 sed -i 's/input=yes/read input/g' "${easyrsa}"
 openvpn --genkey --secret ta.key
+if [[ ${?} != 0 ]];
+then
+	openvpn --genkey secret ta.key
+fi
 clear
 }
 
@@ -983,6 +987,10 @@ done
 # This is temporary until I can find a better solution to avoid prompts
 sed -i 's/input=yes/read input/g' "${easyrsa}"
 openvpn --genkey --secret ta.key
+if [[ ${?} != 0 ]];
+then
+	openvpn --genkey secret ta.key
+fi
 clear
 echo 
 }
