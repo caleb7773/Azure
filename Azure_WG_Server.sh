@@ -821,8 +821,8 @@ wg_ser_ip=$(echo ${wg_subnet} | cut -d '.' -f4-)
 ((wg_ser_ip++))
 wg_server_ip_full=$(echo "${wg_ser_mask}.${wg_ser_ip}/${wg_cidr}")
 
-mkdir ${server_name}
-cd ${server_name}
+mkdir ${server_name}_subnet_vpn
+cd ${server_name}_subnet_vpn
 
 # Generate Private Key
 wg genkey | sudo tee ${server_name}_private.key
