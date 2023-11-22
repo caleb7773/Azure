@@ -1036,15 +1036,13 @@ subnet_script_builder
 echo
 cd ..
 
-
-
-cd "${server_name}"_subnet_vpn
-rm -rf ta.key
 mkdir server_files
 mv *.sh ./server_files/
 mv *.conf ./server_files/
 mkdir server_files/client_certs
-mv *.ovpn ./server_files/client_certs/
+mkdir server_files/keys
+mv *.key server_files/keys
+mv client* ./server_files/client_certs/
 cd server_files
 
 
