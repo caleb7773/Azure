@@ -1033,16 +1033,16 @@ clear
 subnet_cert_builder
 subnet_config_builder
 subnet_script_builder
-echo
-cd ..
+
+
 
 mkdir server_files
 mv *.sh ./server_files/
 mv *.conf ./server_files/
-mkdir server_files/client_certs
+mkdir server_files/certs
 mkdir server_files/keys
 mv *.key server_files/keys
-mv client* ./server_files/client_certs/
+mv client* ./server_files/certs/
 cd server_files
 
 
@@ -1052,7 +1052,7 @@ scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} fe_deploy
 scp -o StrictHostKeyChecking=no -J azureuser@${VM_3_Public_IP_ADDRESS} ${server_name}_server.conf be_deployment_script.sh azureuser@${VM_2_Private_IP_ADDRESS}:/tmp/
 
 
-cd client_certs
+cd certs
 
 
 
@@ -1089,14 +1089,14 @@ rm -rf ${project_code}-ssh1
 rm -rf ${project_code}-ssh2
 rm -rf ${project_code}-ssh3
 
-cd server_files/client_certs
+cd ..
 rm -rf ../bastion.sh
 rm -rf ../be_deployment_script.sh
 rm -rf ../fe_deployment_script.sh
 
 clear
 cd ../../
-cd server_files/client_certs
+cd server_files/certs
 
 
 echo -e " Your Bastion Host IP is: ${GREEN}${VM_3_Public_IP_ADDRESS}${NC}"
