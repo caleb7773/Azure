@@ -825,15 +825,14 @@ mkdir ${server_name}_subnet_vpn
 cd ${server_name}_subnet_vpn
 
 # Generate Private Key
-wg genkey | sudo tee ${server_name}_private.key
-sudo chmod go= ${server_name}_private.key
+wg genkey | tee ${server_name}_private.key
 
 # Generate Public Key
-sudo cat ${server_name}_private.key | wg pubkey | sudo tee ${server_name}_public.key
+cat ${server_name}_private.key | wg pubkey | tee ${server_name}_public.key
 
 
 # Generate Server Configuration File
-sudo tee ${server_name}_server.conf << EOF
+tee ${server_name}_server.conf << EOF
 [Interface]
 PrivateKey = $(cat ${server_name}_private.key)
 Address = ${wg_server_ip_full}
@@ -848,14 +847,13 @@ do
 wg_client_ip_full=$(echo "${wg_ser_mask}.${wg_ser_ip}/${wg_cidr}")
 
 # Create Wireguard Client Certs
-wg genkey | sudo tee client_${client}_private.key
-sudo chmod go= client_${client}_private.key
+wg genkey | tee client_${client}_private.key
 
 # Create Public Key
-sudo cat client_${client}_private.key | wg pubkey | sudo tee client_${client}_public.key
+cat client_${client}_private.key | wg pubkey | tee client_${client}_public.key
 
 # Create Client Configuration File
-sudo tee client_${client}.conf << EOF
+tee client_${client}.conf << EOF
 [Interface]
 PrivateKey = $(cat client_${client}_private.key)
 Address = ${wg_client_ip_full}
@@ -870,7 +868,7 @@ EOF
 
 # Add Wireguard Peers
 
-sudo tee -a ${server_name}_server.conf << EOF
+tee -a ${server_name}_server.conf << EOF
 
 [Peer]
 PublicKey = $(cat client_${client}_public.key)
