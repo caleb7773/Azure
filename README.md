@@ -22,9 +22,14 @@ git clone https://github.com/caleb7773/Azure.git
 cd Azure
 ```
 <br><br><br>
-### To Deploy a simple VPN Server type:
+### To Deploy a simple OpenVPN Server type:
 ```
-bash Azure_VPN_Server.sh
+bash Azure_OVPN_Server.sh
+```
+
+### To Deploy a simple Wireguard Server type:
+```
+bash Azure_WG_Server.sh
 ```
 
 ### To Deploy a simple Redirector type:
