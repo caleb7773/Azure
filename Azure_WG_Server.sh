@@ -773,7 +773,7 @@ export VM_1_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RES
 export VM_2_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name ${VMNAME2} --query publicIps --output tsv)
 export VM_3_Public_IP_ADDRESS=$(az vm show --show-details --resource-group ${RESOURCE_GROUP} --name Bastion --query publicIps --output tsv)
 
-
+vpn_ip=${VM_1_Public_IP_ADDRESS}
 
 
 
@@ -863,7 +863,7 @@ DNS = ${dns}
 PublicKey = $(cat ${server_name}_public.key)
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 15
-Endpoint = ${server_ip}:${port}
+Endpoint = ${vpn_ip}:${port}
 EOF
 
 # Add Wireguard Peers
