@@ -1042,8 +1042,9 @@ mv *.conf ./server_files/
 mkdir server_files/certs
 mkdir server_files/keys
 mv *.key server_files/keys
-mv client* ./server_files/certs/
 cd server_files
+mv client* certs/
+
 
 
 ssh-keyscan -H ${VM_3_Public_IP_ADDRESS} >> ~/.ssh/known_hosts
@@ -1095,7 +1096,7 @@ rm -rf ../be_deployment_script.sh
 rm -rf ../fe_deployment_script.sh
 
 clear
-cd ../../
+cd ..
 cd server_files/certs
 
 
