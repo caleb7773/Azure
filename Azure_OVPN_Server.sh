@@ -9,7 +9,10 @@ function ctrl_c() {
 	echo -e "${RED}Deleting any created Azure Resources to prevent charges${NC}"
  	echo
   	echo "This can take a few minutes. If you do not have time, please go to portal.azure.com"
-   	echo "and delete ${RESOURCE_GROUP} when you have time."
+   	echo "  and delete ${RESOURCE_GROUP} when you have time."
+    	echo
+     	echo -e "If you are trying to start another job, just open a new ${GREEN}Terminal${NC}"
+      	echo "  and let this one finish in the background."
 	az group delete --name ${RESOURCE_GROUP}
  	exit
 }
