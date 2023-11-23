@@ -17,4 +17,13 @@ fi
 
 clear
 echo
-echo -e "${GREEN}
+echo -e "${GREEN}   Welcome to the Azure Quick Deployment Script   ${NC}"
+echo 
+echo -e "   The ${RED}AQDS${NC} will help you deploy your choice of azure resource"
+echo 
+echo " What would you like to deploy?"
+echo -e "${GREEN} 1) OpenVPN Server${NC}"
+echo -e "${GREEN} 2) Wireguard Server${NC}"
+echo -e "${GREEN} 3) Redirector${NC}"
+echo
+read -
