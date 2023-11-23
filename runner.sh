@@ -29,7 +29,7 @@ echo -e "${GREEN} 3) Redirector${NC}"
 echo
 echo "What will it be?"
 read -N 1 -p " > " choice
-
+clear
 if [[ ${choice} == 1 ]];
 then
 	bash Azure_OVPN_Server.sh
