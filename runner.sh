@@ -15,6 +15,7 @@ then
 	exit 1
 fi
 
+
 clear
 echo
 echo -e "${GREEN}   Welcome to the Azure Quick Deployment Script   ${NC}"
@@ -26,4 +27,18 @@ echo -e "${GREEN} 1) OpenVPN Server${NC}"
 echo -e "${GREEN} 2) Wireguard Server${NC}"
 echo -e "${GREEN} 3) Redirector${NC}"
 echo
-read -
+echo "What will it be?"
+read -N 1 -p " > " choice
+
+if [[ ${choice} == 1 ]];
+then
+	bash Azure_OVPN_Server.sh
+fi
+if [[ ${choice} == 2 ]];
+then
+ 	bash Azure_WG_Server.sh
+fi
+if [[ ${choice} == 3 ]];
+then
+  	bash Azure_Redirector.sh
+fi
