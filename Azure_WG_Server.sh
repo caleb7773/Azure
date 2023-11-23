@@ -43,15 +43,6 @@ then
 	sudo apt install wireguard resolvconf -y
 fi
 
-git --version
-if [[ $? != 0 ]];
-then
-	clear
-	echo " Git Missing... "
-	sudo apt update -y && sudo apt upgrade -y
-	sudo apt install git -y
-fi
-
 curl --version
 if [[ $? != 0 ]];
 then
