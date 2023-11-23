@@ -122,6 +122,10 @@ if [[ -z "${server_name}" ]];
 then
 	server_name="..."
 fi
+if [[ -z "${mtu}" ]];
+then
+	mtu="..."
+fi
 }
 
 
