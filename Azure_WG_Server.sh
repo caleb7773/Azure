@@ -37,6 +37,7 @@ fi
 wg --version
 if [[ $? != 0 ]];
 then
+	clear
 	echo " Wireguard Missing... "
 	sudo apt update -y && sudo apt upgrade -y
 	sudo apt install wireguard resolvconf -y
@@ -45,6 +46,7 @@ fi
 git --version
 if [[ $? != 0 ]];
 then
+	clear
 	echo " Git Missing... "
 	sudo apt update -y && sudo apt upgrade -y
 	sudo apt install git -y
@@ -53,6 +55,7 @@ fi
 curl --version
 if [[ $? != 0 ]];
 then
+	clear
 	echo " Curl Missing... "
 	sudo apt update -y && sudo apt upgrade -y
 	sudo apt install curl -y
@@ -61,6 +64,7 @@ fi
 az --version
 if [[ $? != 0 ]];
 then
+	clear
 	echo " AZ CLI Missing... "
 	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 fi
