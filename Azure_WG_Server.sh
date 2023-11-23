@@ -975,11 +975,11 @@ sudo iptables-restore /etc/iptables/rules.v4
 sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 sudo sysctl -p
 
-sudo mv /tmp/${server_name}_server.conf /etc/wireguard/
+sudo mv /tmp/${server_name}_server.conf /etc/wireguard/wg0.conf
 
 # Start up the VPN
-sudo systemctl start wg-quick@${server_name}_server.service
-sudo systemctl enable wg-quick@${server_name}_server.service
+sudo systemctl start wg-quick@wg0.service
+sudo systemctl enable wg-quick@wg0.service
 exit
 EOF
 tee bastion.sh << EOF
