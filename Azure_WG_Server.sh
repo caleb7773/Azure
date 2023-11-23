@@ -4,8 +4,15 @@ trap ctrl_c INT
 function ctrl_c() {
 	rm -rf ${PATHER}/${project_code}*
 	echo && echo && echo
+ 	echo && echo && echo
 	echo -e "${GREEN}Please let this finish...${NC}"
 	echo -e "${RED}Deleting any created Azure Resources to prevent charges${NC}"
+ 	echo
+  	echo "This can take a few minutes. If you do not have time, please go to portal.azure.com"
+   	echo "  and delete ${RESOURCE_GROUP} when you have time."
+    	echo
+     	echo -e "If you are trying to start another job, just open a new ${GREEN}Terminal${NC}"
+      	echo "  and let this one finish in the background."
 	az group delete --name ${RESOURCE_GROUP}
  	exit
 }
