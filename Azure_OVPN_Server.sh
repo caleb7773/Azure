@@ -3,6 +3,10 @@ PATHER=$(pwd)
 trap ctrl_c INT
 function ctrl_c() {
 	rm -rf ${PATHER}/${project_code}*
+	echo && echo && echo
+	echo -e "${GREEN}Please let this finish...${NC}"
+	echo -e "${RED}Deleting any created Azure Resources to prevent charges${NC}"
+	az group delete --name ${RESOURCE_GROUP}
  	exit
 }
 project_code=${RANDOM}
@@ -86,6 +90,7 @@ unset server_ip
 unset port
 unset server_name
 unset client_total
+unset mtu
 dns=1.1.1.1
 cipher=256
 choice=N
@@ -148,6 +153,8 @@ echo " ### VPN Server Dev Name: mwr       ##  VPN Server Dev Name: "${dev_server
 echo " ###                                ##  VPN Client Dev Name: "${dev_client_name}""
 echo " ###                                ##  VPN Encryption Level: "${cipher}""
 echo " ###                                ##  VPN Clients: "${client_total}""
+echo " ###                                ##  VPN MTU: "${mtu}""
+echo " ###                                ##  "
 echo " ###                                ##  "
 echo " #############################################################################"
 echo " #############################################################################"
@@ -426,6 +433,23 @@ echo "##########################################################################
 	if [[ -z "${client_total}" ]];
 	then
 		client_total=5
+	fi
+	builder_menu
+	echo " What MTU would you like to set your tunnel to (1450)?"
+	echo " If you are tunneling through another VPN you may want to drop it"
+	echo
+	echo " Suggestions:"
+	echo
+	echo " Direct Internet - 1450"
+	echo " Through another VPN - 1350"
+	echo " Through multiple tunnels - 1250"
+	echo " Lowest I have needed was 1170"
+	echo 
+	echo " Or you can pick any other number after doing some testing"
+	read -p " > " mtu
+	if [[ -z "${mtu}" ]];
+	then
+		mtu=1450
 	fi
 	builder_menu
 	echo " Do these options look correct? [y/N]"
@@ -838,6 +862,7 @@ verb 4
 mute 20
 keepalive 10 60
 fast-io
+mssfix ${mtu}
 dh none
 push "block-outside-dns"
 push "redirect-gateway def1"
@@ -890,6 +915,7 @@ verb 4
 mute 20
 keepalive 10 60
 fast-io
+mssfix ${mtu}
 
 # Inline Certs
 <ca>
@@ -1226,4 +1252,3 @@ echo -e "   By default the SSH key is utilizing ${GREEN}/home/${USER}/.ssh/id_rs
 echo
 echo -e " ${GREEN}Bastion Public IP${NC} is in the ${RED}same region as the backend IP${NC}"
 xdg-open .
-
