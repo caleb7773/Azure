@@ -1,9 +1,12 @@
-
 #!/bin/bash
 PATHER=$(pwd)
 trap ctrl_c INT
 function ctrl_c() {
 	rm -rf ${PATHER}/${project_code}*
+	echo && echo && echo
+	echo -e "${GREEN}Please let this finish...${NC}"
+	echo -e "${RED}Deleting any created Azure Resources to prevent charges${NC}"
+	az group delete --name ${RESOURCE_GROUP}
  	exit
 }
 project_code=${RANDOM}
