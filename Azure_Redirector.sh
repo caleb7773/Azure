@@ -13,7 +13,7 @@ function ctrl_c() {
     	echo
      	echo -e "If you are trying to start another job, just open a new ${GREEN}Terminal${NC}"
       	echo "  and let this one finish in the background."
-	az group delete --name ${RESOURCE_GROUP}
+	az group delete --name ${RESOURCE_GROUP}  > /dev/null
  	exit
 }
 project_code=${RANDOM}
