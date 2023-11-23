@@ -32,25 +32,6 @@ then
 fi
 
 # Check dependancies
-
-openvpn --version
-if [[ $? != 0 ]];
-then
-	clear
-	echo " OpenVPN Missing... "
-	sudo apt update -y
-	sudo apt install openvpn -y
-fi
-
-git --version
-if [[ $? != 0 ]];
-then
-	clear
-	echo " Git Missing... "
-	sudo apt update -y
-	sudo apt install git -y
-fi
-
 curl --version
 if [[ $? != 0 ]];
 then
