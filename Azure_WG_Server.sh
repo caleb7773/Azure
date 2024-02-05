@@ -294,14 +294,14 @@ echo "##########################################################################
 	fi
 	rm -rf ${project_code}-groups.list
 	echo -e " What would you like to name your Project ${GREEN}(twister)${NC}?"
-	echo -e " ${GREEN}twister${NC} would be -> ${SUBSCRIPTION_NAME}-${REGION}-${GREEN}twister${NC}-rg"
+	echo -e " ${GREEN}twister${NC} would be -> ${SUBSCRIPTION_NAME}-${REGION}-${GREEN}twister${NC}-TP-rg"
 
 	read -p " > " PROJECT
 	if [[ -z "${PROJECT}" ]];
 	then
 		PROJECT=twister
 	fi
-	RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-rg
+	RESOURCE_GROUP=${SUBSCRIPTION_NAME}-${REGION}-${PROJECT}-TP-rg
    	echo
  	echo "Validating Resource Group Choice..."
 	output=$(az group show --name ${RESOURCE_GROUP} 2> /dev/null)
