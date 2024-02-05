@@ -301,7 +301,7 @@ echo "##########################################################################
 	fi
 	rm -rf ${project_code}-groups.list
 	echo -e " What would you like to name your Project ${GREEN}(twister)${NC}?"
-	echo -e " ${GREEN}twister${NC} would be -> ${SUBSCRIPTION_NAME}-${REGION}-${GREEN}twister${NC}-rg"
+	echo -e " ${GREEN}twister${NC} would be -> ${SUBSCRIPTION_NAME}-${REGION}-${GREEN}twister${NC}-TP-rg"
 
 	read -p " > " PROJECT
 	if [[ -z "${PROJECT}" ]];
