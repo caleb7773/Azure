@@ -93,6 +93,10 @@ unset port
 unset server_name
 unset client_total
 unset mtu
+unset PROJECT
+unset SUBSCRIPTION_NAME
+unset REGION
+unset REGION2
 dns=1.1.1.1
 cipher=256
 choice=N
