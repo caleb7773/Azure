@@ -38,7 +38,7 @@ then
 	clear
 	echo " Curl Missing... "
    	echo " Standby while we deploy curl"
-	sudo apt update -y
+	sudo apt update -y && sudo apt upgrade -y
 	sudo apt install curl -y
 fi
 
@@ -48,6 +48,7 @@ then
 	clear
 	echo " AZ CLI Missing... "
    	echo " Standby while we deploy AZ CLI Dependancies"
+    	sudo apt update -y && sudo apt upgrade -y
 	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash -x
 fi
 
