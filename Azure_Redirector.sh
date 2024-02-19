@@ -37,6 +37,7 @@ if [[ $? != 0 ]];
 then
 	clear
 	echo " Curl Missing... "
+   	echo " Standby while we deploy curl"
 	sudo apt update -y
 	sudo apt install curl -y
 fi
@@ -46,7 +47,8 @@ if [[ $? != 0 ]];
 then
 	clear
 	echo " AZ CLI Missing... "
-	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+   	echo " Standby while we deploy AZ CLI Dependancies"
+	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash -x
 fi
 
 # Generate SSH Key if it does not exist
