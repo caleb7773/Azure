@@ -60,6 +60,7 @@ then
 	clear
 	echo " AZ CLI Missing... "
  	echo " Standby while we deploy AZ CLI dependancies"
+  	sudo apt update -y && sudo apt upgrade -y
 	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash -x
 fi
 
