@@ -39,6 +39,7 @@ if [[ $? != 0 ]];
 then
 	clear
 	echo " Wireguard Missing... "
+   	echo " Standby while we deploy wireguard"
 	sudo apt update -y && sudo apt upgrade -y
 	sudo apt install wireguard resolvconf -y
 fi
@@ -48,6 +49,7 @@ if [[ $? != 0 ]];
 then
 	clear
 	echo " Curl Missing... "
+  	echo " Standby while we deploy curl"
 	sudo apt update -y && sudo apt upgrade -y
 	sudo apt install curl -y
 fi
@@ -57,7 +59,8 @@ if [[ $? != 0 ]];
 then
 	clear
 	echo " AZ CLI Missing... "
-	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+ 	echo " Standby while we deploy AZ CLI dependancies"
+	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash -x
 fi
 
 # Generate SSH Key if it does not exist
