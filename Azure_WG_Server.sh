@@ -44,6 +44,16 @@ then
 	sudo apt install wireguard resolvconf -y
 fi
 
+qrencode --version
+if [[ $? != 0 ]];
+then
+	clear
+	echo " Qrencode Missing... "
+   	echo " Standby while we deploy qrencode"
+	sudo apt update -y && sudo apt upgrade -y
+	sudo apt install qrencode -y
+fi
+
 curl --version
 if [[ $? != 0 ]];
 then
@@ -888,6 +898,8 @@ PublicKey = $(cat client_${client}_public.key)
 AllowedIPs = $(echo ${wg_client_ip_full} | cut -d '/' -f1)/32
 EOF
 
+qrencode -r client_${client}.conf -o client_${client}.jpg
+
 ((client++))
 ((client_total--))
 done
@@ -1050,6 +1062,7 @@ subnet_script_builder
 mkdir server_files
 mv *.sh ./server_files/
 mv *.conf ./server_files/
+mv *.jpg ./server_files/
 mkdir server_files/certs
 mkdir server_files/keys
 mv *.key server_files/keys
