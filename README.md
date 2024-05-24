@@ -37,7 +37,7 @@ for i in {1..40}; do echo; done
 
 read -p "Copy your Bastion Host IP here: " bastion_IP
 
-tee -A ~/.ssh/config << EOF
+tee -a ~/.ssh/config << EOF
 Host redirector-frontend
         hostname 10.0.101.4
         user azureuser
@@ -55,4 +55,9 @@ Host redirector-bastion
         user azureuser
         IdentityFile ~/.ssh/id_rsa
 EOF
+
+for i in {1..40}; do echo; done
+echo "To access your servers use the following commands:"
+echo "ssh redirector-frontend"
+echo "ssh redirector-backend"
 ```
