@@ -32,7 +32,8 @@ bash runner.sh
 ```
 touch ~/.ssh/config
 chmod 600 ~/.ssh/config
-
+echo
+echo
 read -p "Copy your Bastion Host IP here: " bastion_IP
 
 tee -A ~/.ssh/config << EOF
