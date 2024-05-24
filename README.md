@@ -26,3 +26,31 @@ cd Azure
 ```
 bash runner.sh
 ```
+
+<br><br><br>
+#### If you want to SSH into your servers do the following!
+```
+touch ~/.ssh/config
+chmod 600 ~/.ssh/config
+
+read -p "Copy your Bastion Host IP here: " bastion_IP
+
+tee -A ~/.ssh/config << EOF
+Host redirector-frontend
+        hostname 10.0.101.4
+        user azureuser
+        IdentityFile ~/.ssh/id_rsa
+        ProxyJump redirector-bastion
+
+Host redirector-backend
+        hostname 10.1.102.5
+        user azureuser
+        IdentityFile ~/.ssh/id_rsa
+        ProxyJump redirector-bastion
+
+Host redirector-bastion
+        hostname ${bastion_IP}
+        user azureuser
+        IdentityFile ~/.ssh/id_rsa
+EOF
+```
