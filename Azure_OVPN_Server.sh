@@ -560,7 +560,100 @@ az network nsg rule create \
     --protocol Udp \
     --description "Allow VPN" > /dev/null
 echo -e "${NC}"
+
+if [[ "${super_random}" == 'yes' ]];
+then
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 320 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 58231 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 330 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 24184 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 340 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 11032 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 350 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 34882 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 360 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 20132 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 370 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 40321 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 380 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 60241 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+echo -e "${RED}"
+az network nsg rule create \
+    --resource-group ${RESOURCE_GROUP} \
+    --nsg-name ${NSG1} \
+    --name VPN-rule \
+    --priority 390 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 10402 \
+    --protocol Udp \
+    --description "Allow VPN" > /dev/null
+echo -e "${NC}"
+fi
 echo -e "${GREEN}Finished modifying for redirector- ${NSG1}${NC}"
+
       
 echo -e "${NC}Creation has begun on - ${VNIC1_IP}${RED}"
 echo -e "${RED}"
@@ -1106,21 +1199,13 @@ if [[ "${super_random}" == 'yes' ]];
 then
 tee -a fe_deployment_script.sh << EOF
 -A PREROUTING -p udp --dport 58231 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 58231 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 -A PREROUTING -p udp --dport 24184 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 24184 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 -A PREROUTING -p udp --dport 11032 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 11032 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 -A PREROUTING -p udp --dport 34882 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 34882 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 -A PREROUTING -p udp --dport 20132 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 20132 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 -A PREROUTING -p udp --dport 40321 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 40321 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 -A PREROUTING -p udp --dport 60241 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 60241 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 -A PREROUTING -p udp --dport 10402 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
--A POSTROUTING -p udp --dport 10402 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
 EOF
 fi
 
@@ -1322,6 +1407,11 @@ echo -e "     Backend is accessible from the Bastion at ${GREEN}${VM_2_Private_I
 echo
 echo -e "   ${RED}SSH Keys are needed${NC}, if you lose them you can regenerate them on the Azure Portal"
 echo -e "   By default the SSH key is utilizing ${GREEN}/home/${USER}/.ssh/id_rsa${NC} as the private key"
+echo
+echo -e "   SSH into FE"
+echo -e "      ssh -i ~/.ssh/id_rsa -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@10.0.101.4"
+echo -e "   SSH into BE"
+echo -e "      ssh -i ~/.ssh/id_rsa -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@10.1.102.5"
 echo
 echo -e " ${GREEN}Bastion Public IP${NC} is in the ${RED}same region as the backend IP${NC}"
 xdg-open .
