@@ -94,6 +94,7 @@ unset dev_server_name
 unset vpn_ip
 unset server_ip
 unset port
+unset super_random
 unset server_name
 unset client_total
 unset mtu
@@ -136,6 +137,10 @@ if [[ -z "${mtu}" ]];
 then
 	mtu="..."
 fi
+if [[ -z "${super_random}" ]];
+then
+	super_random="..."
+fi
 }
 
 
@@ -168,6 +173,7 @@ echo " ###                                ##  VPN Client Dev Name: "${dev_client
 echo " ###                                ##  VPN Encryption Level: "${cipher}""
 echo " ###                                ##  VPN Clients: "${client_total}""
 echo " ###                                ##  VPN MTU: "${mtu}""
+echo " ###                                ##  Super Random Port: "${super_random}""
 echo " ###                                ##  "
 echo " ###                                ##  "
 echo " #############################################################################"
@@ -424,6 +430,14 @@ echo "##########################################################################
 	if [[ -z "${port}" ]];
 	then
 		port=443
+	fi
+ 	builder_menu
+	echo " Would you like to increase survivability by using random ports also (yes or [no])?"
+	read -p " > " super_random
+ 	super_random=$(echo ${super_random} | tr '[:upper:]' '[:lower:]')
+	if [[ -z "${super_random}" ]];
+	then
+		super_random=no
 	fi
 	builder_menu
 	echo " What is your Server's DHCP Subnet for users devices (172.25.0.0)?"
@@ -913,8 +927,25 @@ tee ./"${server_name}"_client_"${client}".ovpn << EOF
 dev-type tun
 dev ${dev_client_name}
 client
-remote ${vpn_ip}
-port ${port}
+EOF
+
+if [[ "${super_random}" == 'yes' ]];
+then
+tee -a ./"${server_name}"_client_"${client}".ovpn << EOF
+remote-random
+remote ${vpn_ip} 58231
+remote ${vpn_ip} 24184
+remote ${vpn_ip} 11032
+remote ${vpn_ip} 34882
+remote ${vpn_ip} 20132
+remote ${vpn_ip} 40321
+remote ${vpn_ip} 60241
+remote ${vpn_ip} 10402
+EOF
+fi
+
+tee -a ./"${server_name}"_client_"${client}".ovpn << EOF
+remote ${vpn_ip} ${port}
 nobind
 ncp-ciphers AES-${cipher}-GCM:AES-${cipher}-CBC
 cipher AES-${cipher}-GCM
@@ -1067,6 +1098,34 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
+EOF
+
+
+
+if [[ "${super_random}" == 'yes' ]];
+then
+tee -a fe_deployment_script.sh << EOF
+-A PREROUTING -p udp --dport 58231 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 58231 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+-A PREROUTING -p udp --dport 24184 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 24184 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+-A PREROUTING -p udp --dport 11032 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 11032 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+-A PREROUTING -p udp --dport 34882 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 34882 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+-A PREROUTING -p udp --dport 20132 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 20132 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+-A PREROUTING -p udp --dport 40321 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 40321 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+-A PREROUTING -p udp --dport 60241 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 60241 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+-A PREROUTING -p udp --dport 10402 -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}:${port}
+-A POSTROUTING -p udp --dport 10402 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}:${port}
+EOF
+fi
+
+
+tee -a fe_deployment_script.sh << EOF
 -A PREROUTING -p udp --dport ${port} -m conntrack --ctstate NEW -j DNAT --to-destination ${VM_2_Private_IP_ADDRESS}
 -A POSTROUTING -p udp --dport ${port} -m conntrack --ctstate NEW -j SNAT --to-source ${VM_1_Private_IP_ADDRESS}
 COMMIT
