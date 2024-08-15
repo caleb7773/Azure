@@ -567,7 +567,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule2 \
     --priority 320 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 58231 \
@@ -578,7 +578,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule3 \
     --priority 330 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 24184 \
@@ -589,7 +589,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule4 \
     --priority 340 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 11032 \
@@ -600,7 +600,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule5 \
     --priority 350 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 34882 \
@@ -611,7 +611,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule6 \
     --priority 360 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 20132 \
@@ -622,7 +622,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule7 \
     --priority 370 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 40321 \
@@ -633,7 +633,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule8 \
     --priority 380 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 60241 \
@@ -644,7 +644,7 @@ echo -e "${RED}"
 az network nsg rule create \
     --resource-group ${RESOURCE_GROUP} \
     --nsg-name ${NSG1} \
-    --name VPN-rule \
+    --name VPN-rule9 \
     --priority 390 \
     --destination-address-prefixes '*' \
     --destination-port-ranges 10402 \
