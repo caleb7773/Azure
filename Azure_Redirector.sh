@@ -897,6 +897,7 @@ echo
 echo -e " ${GREEN}Redirector complete:${NC}"
 echo -e " Packets sent to ${GREEN}${VM_1_Public_IP_ADDRESS}:${ENDPORT} / ${PROTOCOL}${NC}"
 echo -e "    will get ${RED}redirected to${NC} ${GREEN}${ENDPOINT}:${ENDPORT} / ${PROTOCOL}${NC}"
+echo -e "    if you need to limit exposure to only your back end Public IP, it is: ${VM_2_Public_IP_ADDRESS}"
 echo
 echo -e " Your Bastion Host IP is: ${GREEN}${VM_3_Public_IP_ADDRESS}${NC}"
 echo -e "     Frontend is accessible from the Bastion at ${GREEN}${VM_1_Private_IP_ADDRESS}${NC}"
