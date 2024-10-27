@@ -906,6 +906,11 @@ echo
 echo -e "   ${RED}SSH Keys are needed${NC}, if you lose them you can regenerate them on the Azure Portal"
 echo -e "   By default the SSH key is utilizing ${GREEN}/home/${USER}/.ssh/id_rsa${NC} as the private key"
 echo
-echo -e " ${GREEN}Bastion Public IP${NC} is in the ${RED}same region as the backend IP${NC}"
+echo -e "   SSH into FE"
+echo -e "      ssh -i ~/.ssh/id_rsa -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@10.0.101.4"
+echo -e "   SSH into BE"
+echo -e "      ssh -i ~/.ssh/id_rsa -J azureuser@${VM_3_Public_IP_ADDRESS} azureuser@10.1.102.5"
 echo
+echo -e " ${GREEN}Bastion Public IP${NC} is in the ${RED}same region as the backend IP${NC}"
+
 echo
