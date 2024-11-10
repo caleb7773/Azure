@@ -1259,7 +1259,6 @@ COMMIT
 :POSTROUTING ACCEPT [0:0]
 -A POSTROUTING -s ${server_ip}/24 -o eth0 -j MASQUERADE
 COMMIT
-*filter
 EOFFF
 
 sudo iptables-restore /etc/iptables/rules.v4
@@ -1311,7 +1310,6 @@ COMMIT
 -A POSTROUTING -d ${VM_1_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
 -A POSTROUTING -d ${VM_2_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
 COMMIT
-*filter
 EOFFF
 
 sudo iptables-restore /etc/iptables/rules.v4
