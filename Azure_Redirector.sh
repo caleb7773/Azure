@@ -797,7 +797,6 @@ COMMIT
 -A PREROUTING -p ${PROTOCOL} --dport ${ENDPORT} -m conntrack --ctstate NEW -j DNAT --to-destination ${ENDPOINT}:${ENDPORT}
 -A POSTROUTING -p ${PROTOCOL} --dport ${ENDPORT} -m conntrack --ctstate NEW -j MASQUERADE
 COMMIT
-*filter
 EOFFF
 
 sudo iptables-restore /etc/iptables/rules.v4
@@ -842,7 +841,6 @@ COMMIT
 -A POSTROUTING -d ${VM_1_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
 -A POSTROUTING -d ${VM_2_Private_IP_ADDRESS}/32 -p TCP --dport 22 -m conntrack --ctstate NEW -j SNAT --to-source ${VM_3_Private_IP_ADDRESS}
 COMMIT
-*filter
 EOFFF
 
 sudo iptables-restore /etc/iptables/rules.v4
