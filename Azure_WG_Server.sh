@@ -195,7 +195,7 @@ do
    	echo  -e " ${GREEN}Pick the number${NC} corresponding to your choice"
    	echo
 	num=1
-	az account list | grep s2vaus | cut -d '"' -f4 | sort > ${project_code}-subs.list
+	az account list | grep s2vaus | cut -d '"' -f4 | sort -u > ${project_code}-subs.list
 	
 	for i in $(cat ${project_code}-subs.list);
 	do 
@@ -292,7 +292,7 @@ echo "##########################################################################
   	echo
  	echo "Grabbing Resource Groups in your region..."
   	echo
-	az group list | grep "\"${SUBSCRIPTION_NAME}-${REGION}-" | cut -d '"' -f4 | sort > ${project_code}-groups.list
+	az group list | grep "\"${SUBSCRIPTION_NAME}-${REGION}-" | cut -d '"' -f4 | sort -u > ${project_code}-groups.list
 	clear
 	if [[ $(cat ${project_code}-groups.list | wc -l) -eq 0 ]];
 	then
