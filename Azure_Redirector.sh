@@ -379,7 +379,7 @@ echo -e "${RED}"
 az group create \
     --name ${RESOURCE_GROUP} \
     --location ${REGION} > /dev/null
-username=$(az account show | grep onmicrosoft | cut -d '@' -f1 | cut -d '"' -f4)
+username=$(az account show | grep onmicrosoft | tail -1 | cut -d '@' -f1 | cut -d '"' -f4)
 grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)
 az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=unknown Scripted=TechAzurePanda > /dev/null
 echo -e "${NC}"
