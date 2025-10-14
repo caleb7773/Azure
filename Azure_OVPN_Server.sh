@@ -522,7 +522,7 @@ az group create \
     --location ${REGION} > /dev/null
 username=$(az account show | grep onmicrosoft | cut -d '@' -f1 | cut -d '"' -f4)
 grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)
-az tag create --resource-id $grouppy --tags UserAzure=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${server_ip} > /dev/null
+az tag create --resource-id $grouppy --tags UserAzure=${username} AzureDeployingUser=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${server_ip} > /dev/null
 echo -e "${NC}"
 echo -e "${GREEN}Finished - ${RESOURCE_GROUP}${NC}"
 
