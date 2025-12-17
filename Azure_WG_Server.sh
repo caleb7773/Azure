@@ -493,7 +493,10 @@ username=$(az account show | grep onmicrosoft | tail -1 | cut -d '@' -f1 | cut -
 az group create --name ${RESOURCE_GROUP} --tags CreatedBy=${username} --location ${REGION} > /dev/null                                                                                                                                                    
                                                                                                                                                                                         
 grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)                                                                                                                   
-az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${server_ip} > /dev/nullecho -e "${NC}"
+az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${server_ip} > /dev/null
+
+echo -e "${NC}"
+
 echo -e "${GREEN}Finished - ${RESOURCE_GROUP}${NC}"
 
 first_instance() {
