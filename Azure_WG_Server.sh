@@ -496,8 +496,7 @@ az group create \
     --location ${REGION} > /dev/null                                                                                                                                                    
                                                                                                                                                                                         
 grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)                                                                                                                   
-az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${se
-rver_ip} > /dev/nullecho -e "${NC}"
+az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${server_ip} > /dev/nullecho -e "${NC}"
 echo -e "${GREEN}Finished - ${RESOURCE_GROUP}${NC}"
 
 first_instance() {
