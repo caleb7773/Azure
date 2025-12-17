@@ -519,9 +519,8 @@ echo -e "${NC}Creation has begun on - ${RESOURCE_GROUP}${RED}"
 echo -e "${RED}"
 
 username=$(az account show | grep onmicrosoft | tail -1 | cut -d '@' -f1 | cut -d '"' -f4)                                                                                              
-az group create --name ${RESOURCE_GROUP} --tags CreatedBy=${username} --location ${REGION} > /dev/null                                                                                                                                                   
-                                                                                                                                                                                        
-grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)                                                                                                                   
+az group create --name ${RESOURCE_GROUP} --tags CreatedBy=${username} --location ${REGION} > /dev/null
+grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)
 az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${server_ip} > /dev/null
 
 
