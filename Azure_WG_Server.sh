@@ -489,13 +489,15 @@ clear
 # Create a new Resource Group
 echo -e "${NC}Creation has begun on - ${RESOURCE_GROUP}${RED}"
 echo -e "${RED}"
-az group create \
-    --name ${RESOURCE_GROUP} \
-    --location ${REGION} > /dev/null
-username=$(az account show | grep onmicrosoft | tail -1 | cut -d '@' -f1 | cut -d '"' -f4)
-grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)
-az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${server_ip} > /dev/null
-echo -e "${NC}"
+username=$(az account show | grep onmicrosoft | tail -1 | cut -d '@' -f1 | cut -d '"' -f4)                                                                                              
+az group create \                                                                                                                                                                       
+    --name ${RESOURCE_GROUP} \                                                                                                                                                          
+    --tags CreatedBy=${username} \                                                                                                                                                      
+    --location ${REGION} > /dev/null                                                                                                                                                    
+                                                                                                                                                                                        
+grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)                                                                                                                   
+az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=${server_name} Scripted=TechAzurePanda VPNPort=${port} VPNSubnet=${se
+rver_ip} > /dev/nullecho -e "${NC}"
 echo -e "${GREEN}Finished - ${RESOURCE_GROUP}${NC}"
 
 first_instance() {
