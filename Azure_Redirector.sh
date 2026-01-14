@@ -376,10 +376,12 @@ VMNAME2=REDIR_BE
 # Create a new Resource Group
 echo -e "${NC}Creation has begun on - ${RESOURCE_GROUP}${RED}"
 echo -e "${RED}"
+username=$(az account show | grep onmicrosoft | tail -1 | cut -d '@' -f1 | cut -d '"' -f4)
 az group create \
     --name ${RESOURCE_GROUP} \
+    --tags CreatedBy=${username} \
     --location ${REGION} > /dev/null
-username=$(az account show | grep onmicrosoft | tail -1 | cut -d '@' -f1 | cut -d '"' -f4)
+
 grouppy=$(az group show -n ${RESOURCE_GROUP} --query id --output tsv)
 az tag create --resource-id $grouppy --tags UserAzure=${username} CreatedBy=${username} Persistent=unknown UseCase=unknown Scripted=TechAzurePanda > /dev/null
 echo -e "${NC}"
